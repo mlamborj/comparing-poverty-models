@@ -7,7 +7,7 @@ import rioxarray as rxr
 import xarray as xr
 from shapely.geometry import Point
 from . import utils
-from config import DATA_DIR
+from config import DATA_DIR, MODEL_NAMES
 
 inputs = DATA_DIR / "raw"
 
@@ -15,106 +15,77 @@ countries = utils.countries
 smod = utils.smod
 
 
-def mccallum_model(country_name: str, n_bins: int = 3) -> xr.DataArray:
+def mccallum_model(country_name: str) -> xr.DataArray:
     """
     Function for loading McCallum's model data
 
     Args:
         country_name (str): Name of the country
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
 
     Returns:
         xr.DataArray: raster data for the country
     """
-    boundary = utils.read_boundary(country_name)
-    rasext = "wq" if n_bins == 5 else "wc"
     # load data from McCallum's model
     mccallum = (
         rxr.open_rasterio(
-            os.path.join(inputs, "McCallum", f"{country_name}_{rasext}.tif"),
+            os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
             masked=True,
         )
         .squeeze()
         .rio.reproject("EPSG:4326")
-        .rio.clip(boundary.geometry)
         .rio.set_nodata(np.nan)
     )
     return utils.fix_dims(mccallum)
 
 
-def chi_model(country_name: str, n_bins: int = 3) -> xr.DataArray:
+def chi_model(country_name: str) -> xr.DataArray:
     """
     Function for loading Chi's model data.
-    The relative wealth index (rwi) is optionally reclassified to terciles/quintiles for comparison with other models.
 
     Args:
-        country_name (str): Name of the country
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
+        country_name (str): Name of the country.
 
     Returns:
         xr.DataArray: raster data for the country
     """
-    boundary = utils.read_boundary(country_name)
     # load data from the Chi model
     country_code = countries[country_name].lower()
     chi = pd.read_csv(
         os.path.join(inputs, "Chi", f"{country_code}_relative_wealth_index.csv")
     )
-    if n_bins is None:
-        chi = chi.rename(columns={"rwi": "Chi"})
-    else:
-        # reclassify rwi to terciles/quintiles for comparison with other models
-        chi.loc[:, "Chi"] = pd.qcut(chi["rwi"], n_bins, labels=False) + 1
+    chi = chi.rename(columns={"rwi": "Chi"})
     chi = (
         chi[["Chi", "latitude", "longitude"]]
         .pivot(index="latitude", columns="longitude")
         .sort_index(ascending=False)
         .droplevel(0, axis=1)
     )
-    chi = (
-        xr.DataArray(chi)
-        .rio.write_crs("EPSG:4326")
-        .rio.clip(boundary.geometry)
-        .rio.write_nodata(np.nan)
-    )
+    chi = xr.DataArray(chi).rio.write_crs("EPSG:4326").rio.write_nodata(np.nan)
     return utils.fix_dims(chi)
 
 
-def lee_model(country_name: str, n_bins: int = 3) -> xr.DataArray:
+def lee_model(country_name: str) -> xr.DataArray:
     """
     Function for loading Lee's model data.
-    Individual country data is first merged then international wealth index (iwi)
-    is reclassified to terciles/quintiles for comparison with other models.
 
     Args:
         country_name (str, optional): Name of the country.
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
 
     Returns:
         xr.DataArray: raster data for the country
     """
-    boundary = utils.read_boundary(country_name)
     # load data from Lee's model
-    lee = pd.concat(
-        [
-            pd.read_csv(
-                os.path.join(inputs, "Lee", f"{name}_estimated_wealth_index.csv")
-            )
-            for name in countries.keys()
-        ]
+    lee = pd.read_csv(
+        os.path.join(inputs, "Lee", f"{country_name}_estimated_wealth_index.csv")
     )
-    if n_bins is None:
-        lee = lee.rename(columns={"estimated_IWI": "Lee"})
-    else:
-        # reclassify iwi to terciles/quintiles for comparison with other models
-        lee.loc[:, "Lee"] = pd.qcut(lee["estimated_IWI"], n_bins, labels=False) + 1
+    lee = lee.rename(columns={"estimated_IWI": "Lee"})
     lee = gpd.GeoDataFrame(
         lee[["country_name", "Lee"]],
         geometry=[Point(xy) for xy in zip(lee["lon"], lee["lat"])],
         crs="EPSG:4326",
     )
-    lee = lee[lee["country_name"] == country_name].clip(boundary)
-    return utils.rasterize_points(lee, "Lee")
+    lee = lee[lee["country_name"] == country_name]
+    return utils.rasterize_points(lee, "Lee", cell_size=0.0144)  # ~1.6km resolution
 
 
 def dhs_model_contemporary(
@@ -185,33 +156,26 @@ def dhs_model_latest(country_name: str, n_bins: int = 3) -> gpd.GeoDataFrame:
     return utils.rasterize_polygons(dhs, "DHS")
 
 
-def yeh_model(country_name: str, n_bins: int = 3) -> gpd.GeoDataFrame:
+def yeh_model(country_name: str) -> gpd.GeoDataFrame:
     """
     Function for loading Yeh's model data.
 
     Args:
         country_name (str, optional): Name of the country.
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
 
     Returns:
         xr.DataArray: raster data for the country
     """
-    # load country boundaries
-    boundary = utils.read_boundary(country_name, admin_level=2)
     # load data from Yeh's model
-    yeh = pd.read_csv(os.path.join(inputs, "Yeh", "geolevel2_dhs_indices_gadm2.csv"))
-    yeh = yeh.groupby(by="geolev")[["svyid", "predictions"]].last()
-    if n_bins is None:
-        yeh = yeh.rename(columns={"predictions": "Yeh"})
-    else:
-        # reclassify iwi to quintiles for comparison with other models
-        yeh.loc[:, "Yeh"] = pd.qcut(yeh["predictions"], n_bins, labels=False) + 1
-    yeh = boundary.merge(
-        yeh, left_on="GID_2", right_index=True, how="left", validate="1:1"
-    )[["country_name", "GID_2", "NAME_1", "NAME_2", "svyid", "Yeh", "geometry"]]
-    yeh["Yeh"] = yeh["Yeh"].astype(np.float64)  # required for rasterization
-    yeh = yeh[yeh["country_name"] == country_name]
-    return utils.rasterize_polygons(yeh, "Yeh")
+    yeh = pd.read_csv(os.path.join(inputs, "Yeh", "cluster_pred_dhs_indices_gadm2.csv"))
+    yeh = yeh.rename(columns={"index": "Yeh"})
+    yeh = gpd.GeoDataFrame(
+        yeh[["country", "Yeh"]],
+        geometry=[Point(xy) for xy in zip(yeh["lon"], yeh["lat"])],
+        crs="EPSG:4326",
+    )
+    yeh = yeh[yeh["country"] == country_name]
+    return utils.rasterize_points(yeh, "Yeh", cell_size=0.06048)  # ~6.72km resolution
 
 
 def lee_etal(n_bins: int = None) -> pd.DataFrame:
@@ -330,6 +294,117 @@ def chi_yeh(n_bins: int = None) -> pd.DataFrame:
         print("Completed ", name)
     models = models.reset_index(drop=True).dropna(subset=["Chi", "Yeh"])
     return models[["country_name", "smod", "Chi", "Yeh"]]
+
+
+def coincident_pixels(
+    da: xr.DataArray, unanimous_only: bool = False, dim="model"
+) -> xr.DataArray:
+    """
+    This function is for generating country mask based on concident pixels in the input rasters.
+    It compares pixel values from the input rasters and returns the pixel only when all models
+    have a predicted value in the pixel. Comparison is only made if all input models are not NaN
+    in the pixel.
+
+    Args:
+        da (xr.DataArray): Stack of rasters to compare.
+        unanimous_only (bool, optional): Whether to return pixels where all models are present or at least 2 are present.
+            Set True for considering the unanimously present case. Defaults to False.
+        dim (str, optional): Name of dimension along which rasters are stacked. Defaults to 'model'.
+
+    Returns:
+        xr.DataArray: raster with the mode of the input rasters.
+    """
+    # Extract numpy array from the DataArray
+    np_array = da.values
+
+    # Function to determine coincident pixels
+    def resolve_mode(ndarray):
+        # Ignore NaN values
+        valid_values = ndarray[~np.isnan(ndarray)]
+        if unanimous_only:
+            if len(valid_values) != len(da.model):
+                return np.nan  # not all models present
+        else:
+            if len(valid_values) < 2:
+                return np.nan  # not enough models present
+        return 1
+
+    # Apply function along the axis
+    result = np.apply_along_axis(resolve_mode, axis=da.get_axis_num(dim), arr=np_array)
+    # Convert the result back into an xarray DataArray
+    mask = (
+        xr.DataArray(
+            data=result.astype(np.float32),
+            dims=[d for d in da.dims if d != dim],
+            coords={k: v for k, v in da.coords.items() if k != dim},
+        )
+        .rio.write_crs(da.rio.crs)
+        .rio.write_nodata(np.nan)
+    )
+    return mask
+
+
+def generate_quantiles(raster: xr.DataArray, q: int = 3) -> xr.DataArray:
+    """
+    Function to generate quantiles for each model in the rasters DataArray. The
+    function returns a DataArray with the quantile labels as pixel values.
+
+    Args:
+        rasters (xr.DataArray): Raster for which quantiles are to be generated.
+        q (int): Number of quantiles; e.g. 5 for quintiles. Defaults to 3 for terciles.
+    """
+    # calculate quantiles, ignoring NaN values
+    quantiles = raster.quantile(np.linspace(0, 1, q + 1)[1:-1], skipna=True)
+    # flatten the original data array to apply digitize
+    flat_data = raster.values.flatten()
+    # assign bins based on the quantiles; +1 to make it 1-indexed
+    quantiles = np.digitize(flat_data, quantiles).astype(np.float32) + 1
+    # retain NaN values from the original data
+    quantiles = np.where(np.isnan(flat_data), np.nan, quantiles)
+    # reshape back to the original shape
+    quantiles = quantiles.reshape(raster.shape)
+    # Creating a new DataArray with tercile labels
+    da = (
+        xr.DataArray(
+            quantiles,
+            dims=[d for d in raster.dims if d != "model"],
+            coords={k: v for k, v in raster.coords.items() if k != "model"},
+        )
+        .rio.write_crs(raster.rio.crs)
+        .rio.write_nodata(np.nan)
+    )
+    return da
+
+
+def spatial_alignment(country: str, raster_dir: str) -> xr.DataArray:
+    """
+    Function to spatially align rasters and resample pixel sizes to a common resolution.
+    The function reprojects rasters to match Lee's maps (1.6km) and generates a mask for analysis.
+
+    Args:
+        country (str): Name of the country for which the processing is done.
+        raster_dir (str): Directory where input rasters are stored.
+    Returns:
+        xr.DataArray: Stacked rasters with spatial alignment.
+    """
+    rasters = dict()
+    for model in MODEL_NAMES:
+        # read the raster for the model and country
+        rasters[model] = (
+            rxr.open_rasterio(
+                os.path.join(raster_dir, f"{model}_{country}.tif"),
+                masked=True,
+            )
+            .squeeze()
+            .drop("band")
+        )
+    # spatial alignment and raster resampling to match Lee's maps, then stack along 'model' axis
+    rasters = xr.concat(
+        [rasters[model_].rio.reproject_match(rasters["Lee"]) for model_ in MODEL_NAMES],
+        dim="model",
+    ).assign_coords(model=MODEL_NAMES)
+
+    return rasters
 
 
 # def dhs_comparisons(model: str, n_bins: int = None) -> pd.DataFrame:

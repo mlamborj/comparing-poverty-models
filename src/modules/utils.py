@@ -133,7 +133,7 @@ def rasterize_polygons(
 
 
 def rasterize_points(
-    points: gpd.GeoDataFrame, column: str, cell_size: float = 0.0144
+    points: gpd.GeoDataFrame, column: str, cell_size: float
 ) -> xr.DataArray:
     """
     Function for rasterizing points to a raster.
