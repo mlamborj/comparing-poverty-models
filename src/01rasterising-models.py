@@ -16,13 +16,14 @@ model_list = {
 }
 
 #########################################################################################
-#### Convert raw wealth indices to wealth terciles and save as geotiff raster files
+#### Generate raster maps for each model from raw wealth indices and save as geotiffs
 #########################################################################################
 for name, model in model_list.items():
-    print(f"Processing {name} model")
+    print(f"Rasterizing {name} model")
     for country in countries.keys():
         print(f"Generating map for {country}")
         model(country).rio.to_raster(
-            os.path.join(INTERIM_DIR, "model_maps", f"{name}_{country}.tif"), compress="lzw"
+            os.path.join(INTERIM_DIR, "rasterized", f"{name}_{country}.tif"),
+            compress="lzw",
         )
-print("Poverty maps completed.")
+print("Raster maps completed.")

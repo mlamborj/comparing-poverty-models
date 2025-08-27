@@ -60,9 +60,9 @@ def calculate_mode(da: xr.DataArray, dim="model", return_freq=False) -> xr.DataA
             coords={k: v for k, v in da.coords.items() if k != dim},
         )
         .rio.write_crs(da.rio.crs)
-        .rio.write_nodata(da.rio.nodata)
+        .rio.write_nodata(np.nan)
     )
-    return mode
+    return mode.astype(np.float32)
 
 
 def unanimous_mode(da: xr.DataArray, dim="model") -> xr.DataArray:
@@ -106,9 +106,9 @@ def unanimous_mode(da: xr.DataArray, dim="model") -> xr.DataArray:
             coords={k: v for k, v in da.coords.items() if k != dim},
         )
         .rio.write_crs(da.rio.crs)
-        .rio.write_nodata(da.rio.nodata)
+        .rio.write_nodata(np.nan)
     )
-    return mode
+    return mode.astype(np.float32)
 
 
 def pairwise_agreement(da: xr.DataArray, dim="model") -> xr.DataArray:
@@ -153,9 +153,9 @@ def pairwise_agreement(da: xr.DataArray, dim="model") -> xr.DataArray:
             coords={k: v for k, v in da.coords.items() if k != dim},
         )
         .rio.write_crs(da.rio.crs)
-        .rio.write_nodata(da.rio.nodata)
+        .rio.write_nodata(np.nan)
     )
-    return mode
+    return mode.astype(np.float32)
 
 
 def frequency_table(da: xr.DataArray, classes: dict = None) -> pd.DataFrame:
