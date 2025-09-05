@@ -1,6 +1,7 @@
 import numpy as np
 import xarray as xr
 import pandas as pd
+from typing import Union
 from pandas.api.types import CategoricalDtype
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
@@ -63,6 +64,40 @@ def calculate_mode(da: xr.DataArray, dim="model", return_freq=False) -> xr.DataA
         .rio.write_nodata(np.nan)
     )
     return mode.astype(np.float32)
+
+
+def calculate_mode_v(row: pd.Series, return_freq=False) -> float:
+    """
+    This function is the vector equivalent for generating the Spatial Agreement based on majority vote.
+    It compares values from the 3 models and returns the number of models that agree on the same value.
+    Comparison is only made if there are at least 2 non-NaN values, to determine a majority vote.
+
+    Args:
+        row (pd.Series): The input data for a single admin unit across models.
+        return_freq (bool, optional): If True, returns the frequency of the mode, or the
+            actual mode if False. Defaults to False.
+
+    Returns:
+        float: The mode or mode frequency of the input data.
+    """
+    # calculate mode ignoring NaN values
+    mode = row.mode()
+    if return_freq:
+        # logic to handle mode frequency
+        if len(mode) == 1:
+            counts = row.value_counts()
+            # frequency of unanimous mode
+            return counts.loc[mode.iloc[0]]
+        elif len(mode) == 2:
+            case = row.value_counts().iloc[0]
+            # the 2 available models disagree or split agreement
+            return 0 if case == 1 else 1.0
+        else:
+            # the 3 available models disagree
+            return 0
+    else:
+        # logic to handle majority vote ensemble
+        return mode.iloc[0] if len(mode) == 1 else np.nan
 
 
 def unanimous_mode(da: xr.DataArray, dim="model") -> xr.DataArray:
@@ -158,13 +193,16 @@ def pairwise_agreement(da: xr.DataArray, dim="model") -> xr.DataArray:
     return mode.astype(np.float32)
 
 
-def frequency_table(da: xr.DataArray, classes: dict = None) -> pd.DataFrame:
+def frequency_table(
+    da: Union[xr.DataArray, pd.Series], classes: dict = None
+) -> pd.DataFrame:
     """
-    Function to generate raster frequency table. It summarises the unique pixel values
-    and returns their proportions (percentage) in the raster, and the total of non-NaN pixels.
+    Function to generate frequency table. It summarises the unique values from the input raster or dataframe
+    and returns their proportions (percentage), and the total of non-NaN pixels/polygons.
 
     Args:
-        da (xr.DataArray): input raster to summarise.
+        da (xr.DataArray or pd.Series): input data to summarise. Can be an xarray DataArray (raster) or pandas
+        Series (i.e., column from a geopandas dataframe).
         classes (dict, optional): dictionary of classes to retain in the frequency table.
             Keys are the original values in the raster, and values are the new values to retain,
             e.g., {1: 'poor', 2: 'average', 3: 'richer'}.
@@ -174,13 +212,20 @@ def frequency_table(da: xr.DataArray, classes: dict = None) -> pd.DataFrame:
         pd.DataFrame: frequency table
         int (optional): total number of non-NaN pixels in the raster.
     """
-    # Extract numpy array from the DataArray
-    ndarray = da.values
-    # Ignore NaN values
-    valid_values = ndarray[~np.isnan(ndarray)]
-    vals, counts = np.unique(valid_values, return_counts=True)
-    # Create a pandas DataFrame and calculate proportions
-    df = pd.DataFrame({"value": vals, "count": counts})
+    if isinstance(da, xr.DataArray):
+        # Extract numpy array from the DataArray
+        ndarray = da.values
+        # Ignore NaN values
+        valid_values = ndarray[~np.isnan(ndarray)]
+        vals, counts = np.unique(valid_values, return_counts=True)
+        # Create a pandas DataFrame and calculate proportions
+        df = pd.DataFrame({"value": vals, "count": counts})
+    else:
+        # Extract value counts from the column
+        counts = da.value_counts()
+        # Create a pandas DataFrame and calculate proportions
+        df = pd.DataFrame({"value": counts.index, "count": counts.values})
+    # Calculate proportions
     df["proportion"] = 100 * df["count"] / df["count"].sum()
     df["proportion"] = df["proportion"].round(1)
 
