@@ -15,7 +15,7 @@ from modules import sampling
 countries = sampling.countries
 
 ############################################################################################
-#### Determine pixels overlapping in at least 2 models and calculate terciles for each model
+#### Determine pixels overlapping in at least 2 models and calculate quantiles for each model
 ############################################################################################
 for country in countries.keys():
     print(f"Processing {country}")
@@ -25,19 +25,19 @@ for country in countries.keys():
         country, raster_dir=os.path.join(INTERIM_DIR, "rasterized")
     )
     # generate mask showing which pixels to include in the analysis (i.e., at least 2 models overlapping)
-    mask = sampling.coincident_pixels(rasters, unanimous_only=False)
-    # calculate terciles for each model
-    terciles = dict()
+    mask = sampling.coincident_pixels(rasters, unanimous_only=True)
+    # calculate quantiles for each model
+    quantiles = dict()
     for model_name in MODEL_NAMES:
-        print(f"Generating wealth terciles for {model_name}")
+        print(f"Generating wealth quantiles for {model_name}")
         # mask each model's data with the country mask
         da = rasters.sel(model=model_name).where(mask.notnull()).squeeze().drop("model")
-        # calculate terciles, ignoring McCallum's model
-        terciles[model_name] = (
-            da if model_name == "McCallum" else sampling.generate_quantiles(da)
+        # calculate quantiles, ignoring McCallum's model
+        quantiles[model_name] = (
+            da if model_name == "McCallum" else sampling.generate_quantiles(da, q=5)
         )
     # stack rasters along the 'model' dimension
-    terciles = xr.concat(terciles.values(), dim="model").assign_coords(
+    quantiles = xr.concat(quantiles.values(), dim="model").assign_coords(
         model=MODEL_NAMES
     )
 
@@ -46,17 +46,17 @@ for country in countries.keys():
     ############################################################################################
     print("Calculating majority vote ensemble")
     # determine majority class label (i.e., pixel value with majority vote of models)
-    ma.calculate_mode(terciles, return_freq=False).rio.to_raster(
+    ma.calculate_mode(quantiles, return_freq=False).rio.to_raster(
         os.path.join(
             INTERIM_DIR, "raster_stacks/majority_ensemble", f"{country}_mjnsmbl.tif"
         )
     )
     ############################################################################################
-    #### Determine spatial agreement of terciles in overlapping pixels and generate maps
+    #### Determine spatial agreement of quantiles in overlapping pixels and generate maps
     ############################################################################################
     print("Calculating spatial agreement\n")
     # determine spatial agreement (i.e., no. of models in agreement per pixel)
-    ma.calculate_mode(terciles, return_freq=True).rio.to_raster(
+    ma.calculate_mode(quantiles, return_freq=True).rio.to_raster(
         os.path.join(
             INTERIM_DIR, "raster_stacks/spatial_agreement", f"{country}_agrmnt.tif"
         )
@@ -67,27 +67,38 @@ print("All countries completed.")
 #### Calculate summary statistics for majority-vote ensemble by country
 ####################################################################################
 # merge all the country ensemble maps into a single raster
+out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled/unanimous")
 raster_dir = glob(
     os.path.join(INTERIM_DIR, "raster_stacks/majority_ensemble", "*_mjnsmbl.tif")
 )
 rasters = merge_arrays(
     [(rxr.open_rasterio(raster, masked=True).squeeze()) for raster in raster_dir]
 )
-rasters.rio.to_raster(os.path.join(PROCESSED_DIR, "majority_ensemble_map.tif"))
+rasters.rio.to_raster(os.path.join(out_path, "majority_ensemble_map.tif"))
 print("Majority-vote ensemble map completed.")
 
 print("Calculating summary statistics for the majority-vote ensemble")
 stats = pd.DataFrame()
+raster_dir.append(os.path.join(out_path, "majority_ensemble_map.tif"))
 for raster in raster_dir:
     country = os.path.basename(raster).split("_")[0]
     if country not in countries.keys():
         print("Summarising overall statistics")
-    print(f"Summarising statistics for {country}")
+    else:
+        print(f"Summarising statistics for {country}")
 
     raster = rxr.open_rasterio(raster, masked=True).squeeze()
     # calculate pixel stats for each class
     freq_table = ma.frequency_table(
-        raster, classes={1: "Poor", 2: "Average", 3: "Richer"}
+        raster,
+        classes={
+            1: "Poorest",
+            2: "Poorer",
+            3: "Average",
+            4: "Richer",
+            5: "Richest",
+        },
+        # classes={1: "Poor", 2: "Average", 3: "Richer"},
     )
     freq_table.loc[:, "Country"] = country if country in countries.keys() else "Overall"
     freq_table = (
@@ -97,12 +108,13 @@ for raster in raster_dir:
     )
     stats = pd.concat([stats, freq_table])
 stats = (
-    stats[["Country", "Poor", "Average", "Richer"]]
+    stats[["Country", "Poorest", "Poorer", "Average", "Richer", "Richest"]]
+    # stats[["Country", "Poor", "Average", "Richer"]]
     .fillna(0)
     .sort_values(by="Country")
     .reset_index(drop=True)
 )
-stats.to_csv(os.path.join(PROCESSED_DIR, "majority_pixel_stats.csv"), index=False)
+stats.to_csv(os.path.join(out_path, "majority_pixel_stats.csv"), index=False)
 ####################################################################################
 #### Calculate summary statistics for spatial agreement by country
 ####################################################################################
@@ -113,11 +125,12 @@ raster_dir = glob(
 rasters = merge_arrays(
     [rxr.open_rasterio(raster, masked=True).squeeze() for raster in raster_dir]
 )
-rasters.rio.to_raster(os.path.join(PROCESSED_DIR, "spatial_agreement_map.tif"))
+rasters.rio.to_raster(os.path.join(out_path, "spatial_agreement_map.tif"))
 print("Spatial agreement map completed.")
 
 print("Calculating summary statistics for spatial agreement")
 stats = pd.DataFrame()
+raster_dir.append(os.path.join(out_path, "spatial_agreement_map.tif"))
 for raster in raster_dir:
     country = os.path.basename(raster).split("_")[0]
     if country not in countries.keys():
@@ -160,6 +173,6 @@ stats = (
     .reset_index(drop=True)
 )
 stats.to_csv(
-    os.path.join(PROCESSED_DIR, "agreement_pixel_stats.csv"),
+    os.path.join(out_path, "agreement_pixel_stats.csv"),
     index=False,
 )

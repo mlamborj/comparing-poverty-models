@@ -25,10 +25,14 @@ def mccallum_model(country_name: str) -> xr.DataArray:
     Returns:
         xr.DataArray: raster data for the country
     """
+    print(
+        "McCallum model currently uses 'quintiles'. Change in src/modules/sampling.py if needed."
+    )
     # load data from McCallum's model
     mccallum = (
         rxr.open_rasterio(
-            os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
+            # os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
+            os.path.join(inputs, "McCallum", f"{country_name}_wq.tif"),
             masked=True,
         )
         .squeeze()

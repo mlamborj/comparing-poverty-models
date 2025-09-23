@@ -12,7 +12,7 @@ from modules import sampling
 countries = sampling.countries
 
 ############################################################################################
-#### Determine pixels overlapping in at least 2 models and calculate terciles for each model
+#### Determine pixels overlapping in at least 2 models and calculate quantiles for each model
 ############################################################################################
 for country in countries.keys():
     print(f"Processing {country}")
@@ -28,19 +28,21 @@ for country in countries.keys():
     vectors["models"] = vectors[indices].notna().sum(axis=1)
     mask = vectors["models"] >= 2
 
-    print("Generating wealth terciles for all models")
-    # calculate terciles at admin level for each model
-    vectors[MODEL_NAMES] = vectors[mask][indices].apply(sampling.generate_quantiles_v)
+    print("Generating wealth quantiles for all models")
+    # calculate quantiles at admin level for each model
+    vectors[MODEL_NAMES] = vectors[mask][indices].apply(
+        lambda x: sampling.generate_quantiles_v(x, q=5), axis=0
+    )
 
     ############################################################################################
     #### Determine wealth class in overlapping admin units by majority vote and generate maps
     ############################################################################################
     print("Calculating majority vote ensemble")
-    # determine majority class label (i.e., tercile value for majority of models)
+    # determine majority class label (i.e., quantile value for majority of models)
     vectors["majority"] = vectors[mask][MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
 
     ############################################################################################
-    #### Determine spatial agreement of terciles in overlapping admins and export
+    #### Determine spatial agreement of quantiles in overlapping admins and export
     ############################################################################################
     print("Calculating spatial agreement\n")
     # determine spatial agreement (i.e., no. of models in agreement per admin unit)
@@ -60,6 +62,7 @@ print("All countries completed.")
 #### Calculate summary statistics for majority-vote ensemble by country
 ####################################################################################
 # merge all the country ensemble maps into a single dataframe
+out_path = os.path.join(PROCESSED_DIR, "admin-2/quintiles/unpooled")
 vectors = pd.concat(
     [
         gpd.read_file(
@@ -69,9 +72,7 @@ vectors = pd.concat(
         for country in countries.keys()
     ]
 )
-vectors.to_file(
-    os.path.join(PROCESSED_DIR, "admin_ensembles.geojson"), driver="GeoJSON"
-)
+vectors.to_file(os.path.join(out_path, "admin_ensembles.geojson"), driver="GeoJSON")
 print("Majority-vote ensemble map completed.")
 
 print("Calculating summary statistics")
@@ -81,7 +82,14 @@ stats = {"ensemble_stats": pd.DataFrame(), "agreement_stats": pd.DataFrame()}
 for k, df in stats.items():
     col = "majority" if k == "ensemble_stats" else "agreement"
     classes = (
-        {1: "Poor", 2: "Average", 3: "Richer"}
+        # {1: "Poor", 2: "Average", 3: "Richer"}
+        {
+            1: "Poorest",
+            2: "Poorer",
+            3: "Average",
+            4: "Richer",
+            5: "Richest",
+        }  # Extended to quintiles
         if k == "ensemble_stats"
         else {
             0: "No agreement",
@@ -114,4 +122,4 @@ for k, df in stats.items():
     columns.insert(0, "Country")
 
     df = df[columns].fillna(0).sort_values(by="Country").reset_index(drop=True)
-    df.to_csv(os.path.join(PROCESSED_DIR, f"{k}_admins.csv"), index=False)
+    df.to_csv(os.path.join(out_path, f"{k}_admin_stats.csv"), index=False)
