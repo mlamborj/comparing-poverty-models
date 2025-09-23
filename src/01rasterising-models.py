@@ -20,10 +20,14 @@ model_list = {
 #########################################################################################
 for name, model in model_list.items():
     print(f"Rasterizing {name} model")
+    print("*" * 50)
+
     for country in countries.keys():
         print(f"Generating map for {country}")
         model(country).rio.to_raster(
             os.path.join(INTERIM_DIR, "rasterized", f"{name}_{country}.tif"),
             compress="lzw",
         )
+
+    print("*" * 50)
 print("Raster maps completed.")

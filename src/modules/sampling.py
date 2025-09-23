@@ -25,10 +25,14 @@ def mccallum_model(country_name: str) -> xr.DataArray:
     Returns:
         xr.DataArray: raster data for the country
     """
+    print(
+        "McCallum model currently uses 'quintiles'. Change in src/modules/sampling.py if needed."
+    )
     # load data from McCallum's model
     mccallum = (
         rxr.open_rasterio(
-            os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
+            # os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
+            os.path.join(inputs, "McCallum", f"{country_name}_wq.tif"),
             masked=True,
         )
         .squeeze()
@@ -176,6 +180,55 @@ def yeh_model(country_name: str) -> gpd.GeoDataFrame:
     )
     yeh = yeh[yeh["country"] == country_name]
     return utils.rasterize_points(yeh, "Yeh", cell_size=0.06048)  # ~6.72km resolution
+
+
+def weighted_aggregation(
+    da: xr.DataArray, gdf: gpd.GeoDataFrame, model: str, country: str
+) -> gpd.GeoDataFrame:
+    """
+    Function for aggregating model pixels to admin 2.
+    The function calculates population weighted index for each admin 2 unit, using
+    WorldPop population density data.
+
+    Args:
+        da (xr.DataArray): rasterized model data
+        gdf (gpd.GeoDataFrame): admin 2 polygons data
+        model (str): model name
+        country (str): country name
+
+    Returns:
+        gpd.GeoDataFrame: admin 2 data with population weighted model index
+    """
+    # prepare population data
+    raster = (
+        rxr.open_rasterio(
+            f"../data/external/population/{countries[country].lower()}_pd_2020_1km.tif",
+            masked=True,
+        )
+        .squeeze()
+        .rio.set_crs("EPSG:4326")
+        .rio.write_nodata(np.nan)
+        .to_dataset(name="popn")
+    )
+    # align common pixels in both rasters
+    raster[f"{model}"] = da.rio.reproject_match(raster["popn"])
+    raster["popn"] = raster["popn"].where(raster[f"{model}"].notnull())
+
+    # calculate population weighted index and aggregate to admin 2
+    raster[f"{model}_popn"] = (raster[f"{model}"] * raster["popn"]).rio.write_nodata(
+        np.nan
+    )
+    for var in raster.data_vars.keys():
+        gdf = utils.sample_polygons(raster[var], gdf, "sum").rename(
+            columns={"sum": var}
+        )
+    gdf[f"{model}_weighted"] = (gdf[f"{model}_popn"] / gdf["popn"]).astype(
+        "float"
+    )  # .round()
+    gdf = gdf.drop(columns=[f"{model}", "popn", f"{model}_popn"]).rename(
+        columns={f"{model}_weighted": f"{model}_index"}
+    )
+    return gdf
 
 
 def lee_etal(n_bins: int = None) -> pd.DataFrame:
@@ -374,6 +427,28 @@ def generate_quantiles(raster: xr.DataArray, q: int = 3) -> xr.DataArray:
         .rio.write_nodata(np.nan)
     )
     return da
+
+
+def generate_quantiles_v(col: pd.Series, q: int = 3) -> pd.Series:
+    """
+    Function to generate quantiles for each model in the dataframe. The function returns a Series
+    with the quantile labels as values.
+
+    Args:
+        col (pd.Series): Column for which quantiles are to be generated.
+        q (int, optional): Number of quantiles e.g., 5 for quintiles. Defaults to 3 for terciles.
+
+    Returns:
+        pd.Series: Column with quantile labels as values.
+    """
+    # quantile labels
+    labels = list(range(1, q + 1))
+    try:
+        quantiles = pd.qcut(col, q, labels=labels).astype(float)
+    except ValueError:
+        # raised if there are too few unique values (McCallum in DRC)
+        quantiles = pd.qcut(col.rank(method="first"), q, labels=labels).astype(float)
+    return quantiles
 
 
 def spatial_alignment(country: str, raster_dir: str) -> xr.DataArray:
