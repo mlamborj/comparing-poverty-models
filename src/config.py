@@ -6,7 +6,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 REPORTS_DIR = PROJECT_ROOT / "reports"
 
 # data directories
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = PROJECT_ROOT / "data"  # PROJECT_ROOT / "data-Yeh-resolution"
 RAW_DIR = DATA_DIR / "raw"
 INTERIM_DIR = DATA_DIR / "interim"
 PROCESSED_DIR = DATA_DIR / "processed"
@@ -24,6 +24,6 @@ MODEL_PAIRS = [
     "Lee_Chi",
     "Lee_Yeh",
     "Lee_McCallum",
-    "McCallum_Chi",
-    "McCallum_Yeh",
+    "Chi_McCallum",
+    "Yeh_McCallum",
 ]

@@ -21,7 +21,7 @@ for country in countries.keys():
     gdf = utils.read_boundary(country, admin_level=2)[
         ["GID_2", "country_name", "NAME_2", "geometry"]
     ]
-    # todo add SMOD classification for each admin (do we weight as well???)
+
     for model in MODEL_NAMES:
         print(f"Vectorizing {model} model")
         # get the rasterized model

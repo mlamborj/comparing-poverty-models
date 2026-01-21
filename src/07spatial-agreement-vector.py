@@ -24,29 +24,36 @@ for country in countries.keys():
         layer=f"{country}_models",
     )
     indices = [col for col in vectors.columns if col.endswith("index")]
-    # filter admin units to include in the analysis (i.e., at least 2 models present in a polygon)
-    vectors["models"] = vectors[indices].notna().sum(axis=1)
-    mask = vectors["models"] >= 2
+    # # filter admin units to include in the analysis (i.e., at least 2 models present in a polygon)
+    # vectors["models"] = vectors[indices].notna().sum(axis=1)
+    # mask = vectors["models"] >= 2
 
     print("Generating wealth quantiles for all models")
-    # calculate quantiles at admin level for each model
-    vectors[MODEL_NAMES] = vectors[mask][indices].apply(
-        lambda x: sampling.generate_quantiles_v(x, q=5), axis=0
+    # # calculate quantiles at admin level for each model
+    # vectors[MODEL_NAMES] = vectors[mask][indices].apply(
+    #     lambda x: sampling.generate_quantiles_v(x, q=3), axis=0
+    # )
+    vectors[MODEL_NAMES] = vectors[indices].apply(
+        lambda x: sampling.generate_quantiles_v(x, q=3), axis=0
     )
 
     ############################################################################################
     #### Determine wealth class in overlapping admin units by majority vote and generate maps
     ############################################################################################
     print("Calculating majority vote ensemble")
-    # determine majority class label (i.e., quantile value for majority of models)
-    vectors["majority"] = vectors[mask][MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
+    # # determine majority class label (i.e., quantile value for majority of models)
+    # vectors["majority"] = vectors[mask][MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
+    vectors["majority"] = vectors[MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
 
     ############################################################################################
     #### Determine spatial agreement of quantiles in overlapping admins and export
     ############################################################################################
     print("Calculating spatial agreement\n")
-    # determine spatial agreement (i.e., no. of models in agreement per admin unit)
-    vectors["agreement"] = vectors[mask][MODEL_NAMES].apply(
+    # # determine spatial agreement (i.e., no. of models in agreement per admin unit)
+    # vectors["agreement"] = vectors[mask][MODEL_NAMES].apply(
+    #     lambda x: ma.calculate_mode_v(x, return_freq=True), axis=1
+    # )
+    vectors["agreement"] = vectors[MODEL_NAMES].apply(
         lambda x: ma.calculate_mode_v(x, return_freq=True), axis=1
     )
     # export spatial agreement vector
@@ -62,7 +69,7 @@ print("All countries completed.")
 #### Calculate summary statistics for majority-vote ensemble by country
 ####################################################################################
 # merge all the country ensemble maps into a single dataframe
-out_path = os.path.join(PROCESSED_DIR, "admin-2/quintiles/unpooled")
+out_path = os.path.join(PROCESSED_DIR, "admin-2/terciles/unpooled")
 vectors = pd.concat(
     [
         gpd.read_file(
@@ -78,18 +85,19 @@ print("Majority-vote ensemble map completed.")
 print("Calculating summary statistics")
 
 stats = {"ensemble_stats": pd.DataFrame(), "agreement_stats": pd.DataFrame()}
+country_list = list(countries.keys()) + ["overall"]
 
 for k, df in stats.items():
     col = "majority" if k == "ensemble_stats" else "agreement"
     classes = (
-        # {1: "Poor", 2: "Average", 3: "Richer"}
-        {
-            1: "Poorest",
-            2: "Poorer",
-            3: "Average",
-            4: "Richer",
-            5: "Richest",
-        }  # Extended to quintiles
+        {1: "Poor", 2: "Average", 3: "Richer"}
+        # {
+        #     1: "Poorest",
+        #     2: "Poorer",
+        #     3: "Average",
+        #     4: "Richer",
+        #     5: "Richest",
+        # }  # Extended to quintiles
         if k == "ensemble_stats"
         else {
             0: "No agreement",
@@ -100,12 +108,14 @@ for k, df in stats.items():
         }
     )
 
-    for country in countries.keys():
-        # if country_name not in countries.keys():
-        #     print("Summarising overall statistics")
-        print(f"Summarising statistics for {country}")
+    for country in country_list:
+        if country not in countries.keys():
+            print("Summarising overall statistics")
+            vector = vectors.copy()
+        else:
+            print(f"Summarising statistics for {country}")
+            vector = vectors[vectors["country_name"] == country]
 
-        vector = vectors[vectors["country_name"] == country]
         # calculate admin stats for each class
         freq_table = ma.frequency_table(vector[col], classes=classes)
         freq_table.loc[:, "Country"] = (

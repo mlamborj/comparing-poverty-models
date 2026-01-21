@@ -1,3 +1,6 @@
+import os
+from collections import Counter
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -6,12 +9,12 @@ import rioxarray as rxr
 import xarray as xr
 from rasterio import MemoryFile, features, transform
 from rasterstats import zonal_stats
+from shapely.geometry import Polygon
 
-from config import COUNTRIES_FILE, GADM_FILE, SMOD_FILE
+from config import COUNTRIES_FILE, GADM_FILE, RAW_DIR, SMOD_FILE
 
 countries = pd.read_csv(COUNTRIES_FILE)
 countries = dict(zip(countries["name"], countries["alpha-3"]))
-smod = rxr.open_rasterio(SMOD_FILE, masked=True).squeeze()
 
 
 def read_boundary(country_name: str = None, admin_level: int = 0) -> gpd.GeoDataFrame:
@@ -38,6 +41,18 @@ def read_boundary(country_name: str = None, admin_level: int = 0) -> gpd.GeoData
             layer="district_boundaries",
         )
     return gdf[gdf["country_name"] == country_name] if country_name else gdf
+
+
+def urbanisation_class(da: xr.Dataset, country: str) -> xr.Dataset:
+    if country not in countries.keys():
+        smod = rxr.open_rasterio(SMOD_FILE, masked=True).squeeze()
+    else:
+        smod = rxr.open_rasterio(
+            os.path.join(RAW_DIR, f"SMOD/{countries[country]}_smod.tif"), masked=True
+        ).squeeze()
+    # clip smod raster to country extent and export
+    da["smod"] = smod.rio.reproject_match(da)
+    return da
 
 
 # def sample_points(
@@ -171,7 +186,7 @@ def rasterize_polygons(
         coords={
             "y": y[::-1],
             "x": x,
-        },  # Note: y should be reversed to have top-left (NW) origin
+        },  # Note: y is reversed to have top-left (NW) origin
     ).rio.write_crs(polygons.crs)
 
     burned = features.rasterize(
@@ -184,7 +199,7 @@ def rasterize_polygons(
         transform=transform.from_origin(
             west=xmin, north=ymax, xsize=pixel_size, ysize=pixel_size
         ),
-        all_touched=True,
+        all_touched=True,  ## consider changing to False
         dtype=np.float32,
     )
     raster = (
@@ -266,6 +281,109 @@ def fix_dims(raster):
     if y != "y" or x != "x":
         raster = raster.rename({y: "y", x: "x"})
     return raster
+
+
+def raster_to_hexgrid(
+    raster: xr.DataArray, agg_method: str = "antimode", factor: int = 500
+) -> gpd.GeoDataFrame:
+    """
+    Function to generate a hexagonal (vector) grid from a raster.
+
+    Args:
+        raster (xr.DataArray): The input raster data.
+        agg_method (str, optional): The aggregation method to use. Should be one of ["mean", "mode", "median", "antimode"].
+            Defaults to "antimode".
+        factor (int, optional): The factor by which to coarsen the grid.
+            Decrease factor for more coarse hexagons. Defaults to 500.
+
+    Returns:
+        gpd.GeoDataFrame: A GeoDataFrame containing the hexagonal grid.
+
+    """
+
+    def hexagon(center_x, center_y, size):
+        """
+        Create a regular hexagon polygon centered at (center_x, center_y).
+        size = distance from center to vertex (radius).
+        """
+        angles = (
+            np.linspace(0, 2 * np.pi, 7)[:-1] + np.pi / 6
+        )  # 6 vertices, closed polygon
+        x_hex = center_x + size * np.cos(angles)
+        y_hex = center_y + size * np.sin(angles)
+        return Polygon(zip(x_hex, y_hex))
+
+    def make_hexgrid(xmin, ymin, xmax, ymax, hex_size, crs=None):
+        """
+        Create a GeoDataFrame of hexagons covering the given bounding box.
+        hex_size = distance from center to vertex (radius).
+        """
+        dx = np.sqrt(3) * hex_size  # horizontal spacing
+        dy = 1.5 * hex_size  # vertical spacing
+
+        cols = np.arange(xmin, xmax + dx, dx)
+        rows = np.arange(ymin, ymax + dy, dy)
+
+        hexes = []
+        # construct hexagons
+        for j, y in enumerate(rows):
+            for _, x in enumerate(cols):
+                # Offset every other row (staggered layout)
+                x_offset = (dx / 2) if (j % 2) else 0
+                hexes.append(hexagon(x + x_offset, y, hex_size))
+
+        return gpd.GeoDataFrame(geometry=hexes, crs=crs)
+
+    def agg_func(series, method):
+        if len(series) == 0:
+            return np.nan
+
+        method = method.lower()
+        if method == "mean":
+            return series.mean()
+        elif method == "median":
+            return series.median()
+        elif method == "mode":
+            modes = series.mode()
+            return modes.iloc[0] if not modes.empty else np.nan
+        elif method == "antimode":
+            counts = Counter(series)
+            min_count = min(counts.values())
+            rare_values = [v for v, c in counts.items() if c == min_count]
+            return rare_values[0]
+        else:
+            raise ValueError(
+                "Invalid method. Choose from 'mean', 'median', 'mode', or 'antimode'."
+            )
+
+    # Extract valid pixel values
+    raster_values = raster.values
+    nodata = raster.rio.nodata
+    mask = ~np.isnan(raster_values) if np.isnan(nodata) else raster_values != nodata
+
+    rows, cols = np.where(mask)
+    xs, ys = raster.x[cols].values, raster.y[rows].values
+    values = raster_values[rows, cols]
+
+    # Create GeoDataFrame of valid pixels
+    points_gdf = gpd.GeoDataFrame(
+        {"value": values}, geometry=gpd.points_from_xy(xs, ys), crs=raster.rio.crs
+    )
+
+    # Create hexagonal grid covering raster extent
+    xmin, ymin, xmax, ymax = raster.rio.bounds()
+    # determine hexagon size (resolution)
+    hex_size = (xmax - xmin) / factor
+    hexgrid = make_hexgrid(xmin, ymin, xmax, ymax, hex_size, crs=points_gdf.crs)
+
+    # Spatial join: assign each pixel to its hex and aggregate pixel values by hexagon
+    hexgrid["Value"] = (
+        gpd.sjoin(points_gdf, hexgrid, predicate="within")
+        .groupby("index_right")["value"]
+        .apply(agg_func, method=agg_method)
+    )
+
+    return hexgrid
 
 
 # if __name__ == "__main__":

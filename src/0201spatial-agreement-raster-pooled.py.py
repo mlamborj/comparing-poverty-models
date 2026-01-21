@@ -17,21 +17,24 @@ countries = sampling.countries
 #### Determine pixels overlapping in at least 2 models and calculate quantiles for each model
 ############################################################################################
 raster_dir = []
+mask_dir = []
 for country in countries.keys():
     print(f"Processing {country}")
     print("*" * 50)
-    # align rasters to each other and resample to the same resolution (1.6 km)
-    rasters = sampling.spatial_alignment(
-        country, raster_dir=os.path.join(INTERIM_DIR, "rasterized")
-    )
+    # align rasters to each other and resample to the same resolution
+    rasters = sampling.spatial_alignment(country)
     # generate mask showing which pixels to include in the analysis (i.e., at least 2 models overlapping)
-    mask = sampling.coincident_pixels(rasters, unanimous_only=False)
+    mask = sampling.coincident_pixels(rasters)
 
-    # mask all models with the country mask
-    raster_dir.append(rasters.where(mask.notnull()).squeeze())
+    # # mask all models with the country mask
+    # raster_dir.append(rasters.where(mask.notnull()).squeeze())
+    raster_dir.append(rasters)
+    mask_dir.append(mask)
 
 # merge all the country ensemble maps into a single raster
 da = merge_arrays(raster_dir, nodata=np.nan)
+# merge all the country masks into a single mask
+mask = merge_arrays(mask_dir, nodata=np.nan)
 
 # calculate quantiles for each model for pooled countries
 quantiles = dict()
@@ -40,10 +43,17 @@ for model_name in MODEL_NAMES:
     quantiles[model_name] = (
         da.sel(model=model_name).drop("model")
         if model_name == "McCallum"
-        else sampling.generate_quantiles(da.sel(model=model_name), q=3)
+        else sampling.generate_weighted_quantiles(
+            da.sel(model=model_name), country="all", q=3
+        )
+        # else sampling.generate_quantiles(da.sel(model=model_name), q=3)
     )
 # stack rasters along the 'model' dimension
-quantiles = xr.concat(quantiles.values(), dim="model").assign_coords(model=MODEL_NAMES)
+quantiles = (
+    xr.concat(quantiles.values(), dim="model")
+    .assign_coords(model=MODEL_NAMES)
+    .where(mask.notnull())  # only keep pixels overlapping in at least 2 models
+)
 
 # ############################################################################################
 # #### Determine wealth class in overlapping pixels by majority vote and generate maps

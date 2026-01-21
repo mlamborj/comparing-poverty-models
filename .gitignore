@@ -93,4 +93,5 @@ target/
 /models/
 
 # exclude data from source control by default
-/data/
+data/
+data-Lee-resolution/

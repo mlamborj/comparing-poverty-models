@@ -5,41 +5,50 @@ import numpy as np
 import pandas as pd
 import rioxarray as rxr
 import xarray as xr
+from rasterio.enums import Resampling
+from rioxarray.merge import merge_arrays
 from shapely.geometry import Point
+
+from config import DATA_DIR, INTERIM_DIR, MODEL_NAMES
+
 from . import utils
-from config import DATA_DIR, MODEL_NAMES
 
 inputs = DATA_DIR / "raw"
 
 countries = utils.countries
-smod = utils.smod
+# smod = utils.smod
 
 
-def mccallum_model(country_name: str) -> xr.DataArray:
+def mccallum_model(country_name: str, version: str = "terciles") -> xr.DataArray:
     """
     Function for loading McCallum's model data
 
     Args:
         country_name (str): Name of the country
+        version (str): Version of the model to load ("terciles" or "quintiles")
 
     Returns:
         xr.DataArray: raster data for the country
     """
+    # determine file name based on terciles/quintiles
+    types = {"terciles": "wc", "quintiles": "wq"}
+
     print(
-        "McCallum model currently uses 'quintiles'. Change in src/modules/sampling.py if needed."
+        f"McCallum model currently uses '{version}'. Change this behaviour if needed."
     )
+
     # load data from McCallum's model
     mccallum = (
         rxr.open_rasterio(
-            # os.path.join(inputs, "McCallum", f"{country_name}_wc.tif"),
-            os.path.join(inputs, "McCallum", f"{country_name}_wq.tif"),
-            masked=True,
+            os.path.join(inputs, "McCallum", f"{country_name}_{types[version]}.tif"),
+            masked=False,
         )
         .squeeze()
         .rio.reproject("EPSG:4326")
-        .rio.set_nodata(np.nan)
+        .rio.write_nodata(np.nan)
     )
-    return utils.fix_dims(mccallum)
+    mccallum = mccallum.where(mccallum > 0)
+    return utils.fix_dims(mccallum)  # ~2.5km resolution
 
 
 def chi_model(country_name: str) -> xr.DataArray:
@@ -65,7 +74,7 @@ def chi_model(country_name: str) -> xr.DataArray:
         .droplevel(0, axis=1)
     )
     chi = xr.DataArray(chi).rio.write_crs("EPSG:4326").rio.write_nodata(np.nan)
-    return utils.fix_dims(chi)
+    return utils.fix_dims(chi)  # ~2.4km resolution
 
 
 def lee_model(country_name: str) -> xr.DataArray:
@@ -92,75 +101,7 @@ def lee_model(country_name: str) -> xr.DataArray:
     return utils.rasterize_points(lee, "Lee", cell_size=0.0144)  # ~1.6km resolution
 
 
-def dhs_model_contemporary(
-    model_name: str, country_name: str = None, n_bins: int = 3
-) -> xr.DataArray:
-    """
-    Function for loading contemporary DHS data for respective models.
-    The relative wealth index (rwi) is optionally reclassified to terciles/quintiles for comparison with other models.
-
-    Args:
-        country_name (str, optional): Name of the country.
-        model_name (str): Name of the model. Determines the DHS survey year
-        to compare with.
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
-
-    Returns:
-        gpd.GeoDataFrame: point data for all countries
-    """
-    # boundary=utils.read_boundary(country_name)
-    # load data from DHS
-    dhs = pd.read_csv(os.path.join(inputs, "DHS", f"DHS_{model_name.lower()}.csv"))
-    if country_name is not None:
-        dhs = dhs[dhs["country_name"] == country_name.lower()]
-    if n_bins is None:
-        dhs = dhs.rename(columns={"wealth_index": "DHS"})
-    else:
-        # reclassify rwi to terciles/quintiles for comparison with other models
-        dhs.loc[:, "DHS"] = pd.qcut(dhs["wealth_index"], n_bins, labels=False) + 1
-    dhs = gpd.GeoDataFrame(
-        dhs[["country_name", "urban_rural", "DHS"]],
-        geometry=[Point(xy) for xy in zip(dhs["LONGNUM"], dhs["LATNUM"])],
-        crs="EPSG:4326",
-    )
-    # buffer points to match DHS cluster size
-    dhs["buffer"] = dhs["urban_rural"].map(lambda x: 0.018018 if x == 2 else 0.045045)
-    dhs["geometry"] = dhs.geometry.buffer(dhs["buffer"])
-    # dhs=dhs.clip(boundary)
-    return utils.rasterize_polygons(dhs, "DHS")
-
-
-def dhs_model_latest(country_name: str, n_bins: int = 3) -> gpd.GeoDataFrame:
-    """
-    Function for loading latest DHS data for respective countries.
-    The relative wealth index (rwi) is optionally reclassified to terciles/quintiles for comparison with other models.
-
-    Args:
-        country_name (str): Name of the country.
-        n_bins (int, optional): Number of bins for reclassification. Defaults to 3.
-
-    Returns:
-        gpd.GeoDataFrame: point data for all countries
-    """
-    # load data from DHS
-    dhs = pd.read_csv(os.path.join(inputs, "DHS", f"{country_name.lower()}.csv"))
-    if n_bins is None:
-        dhs = dhs.rename(columns={"wealth_index": "DHS"})
-    else:
-        # reclassify rwi to terciles/quintiles for comparison with other models
-        dhs.loc[:, "DHS"] = pd.qcut(dhs["wealth_index"], n_bins, labels=False) + 1
-    dhs = gpd.GeoDataFrame(
-        dhs[["urban_rural", "DHS"]],
-        geometry=[Point(xy) for xy in zip(dhs["LONGNUM"], dhs["LATNUM"])],
-        crs="EPSG:4326",
-    )
-    # buffer points to match DHS cluster size
-    dhs["buffer"] = dhs["urban_rural"].map(lambda x: 0.018018 if x == 2 else 0.045045)
-    dhs["geometry"] = dhs.geometry.buffer(dhs["buffer"])
-    return utils.rasterize_polygons(dhs, "DHS")
-
-
-def yeh_model(country_name: str) -> gpd.GeoDataFrame:
+def yeh_model(country_name: str) -> xr.DataArray:
     """
     Function for loading Yeh's model data.
 
@@ -180,6 +121,61 @@ def yeh_model(country_name: str) -> gpd.GeoDataFrame:
     )
     yeh = yeh[yeh["country"] == country_name]
     return utils.rasterize_points(yeh, "Yeh", cell_size=0.06048)  # ~6.72km resolution
+
+
+def dhs_model_contemporary(model_name: str, country_name: str = None) -> xr.DataArray:
+    """
+    Function for loading DHS data which was latest at the time each model was published.
+    The DHS data used will differ based on the model and the country being compared.
+
+    Args:
+        country_name (str, optional): Name of the country. If None, loads data for all countries. Defaults to None.
+        model_name (str): Name of the model. Determines the DHS survey year to compare with.
+
+    Returns:
+        xr.DataArray: rasterized DHS clusters where pixel value is DHS relative wealth index.
+    """
+    # load data from DHS
+    dhs = pd.read_csv(os.path.join(inputs, "DHS", f"DHS_{model_name.lower()}.csv"))
+    # filter for country if specified
+    if country_name is not None:
+        dhs = dhs[dhs["country_name"] == country_name.lower()]
+    dhs = dhs.rename(columns={"wealth_index": "DHS"})
+    dhs = gpd.GeoDataFrame(
+        dhs[["country_name", "urban_rural", "DHS"]],
+        geometry=[Point(xy) for xy in zip(dhs["LONGNUM"], dhs["LATNUM"])],
+        crs="EPSG:4326",
+    )
+    # buffer points to match DHS cluster size
+    dhs["buffer"] = dhs["urban_rural"].map(lambda x: 0.018018 if x == 2 else 0.045045)
+    dhs["geometry"] = dhs.geometry.buffer(dhs["buffer"])
+    # dhs=dhs.clip(boundary)
+    return utils.rasterize_polygons(dhs, "DHS", resolution=0.018)  # ~2km resolution
+
+
+def dhs_model_latest(country_name: str) -> xr.DataArray:
+    """
+    Function for loading latest DHS data for respective countries.
+    The DHS data is latest as at 2022.
+
+    Args:
+        country_name (str): Name of the country.
+
+    Returns:
+        xr.DataArray: rasterized DHS clusters where pixel value is DHS relative wealth index.
+    """
+    # load data from DHS
+    dhs = pd.read_csv(os.path.join(inputs, "DHS", f"{country_name.lower()}.csv"))
+    dhs = dhs.rename(columns={"wealth_index": "DHS"})
+    dhs = gpd.GeoDataFrame(
+        dhs[["urban_rural", "DHS"]],
+        geometry=[Point(xy) for xy in zip(dhs["LONGNUM"], dhs["LATNUM"])],
+        crs="EPSG:4326",
+    )
+    # buffer points to match DHS cluster size
+    dhs["buffer"] = dhs["urban_rural"].map(lambda x: 0.018018 if x == 2 else 0.045045)
+    dhs["geometry"] = dhs.geometry.buffer(dhs["buffer"])
+    return utils.rasterize_polygons(dhs, "DHS", resolution=0.018)  # ~2km resolution
 
 
 def weighted_aggregation(
@@ -202,7 +198,10 @@ def weighted_aggregation(
     # prepare population data
     raster = (
         rxr.open_rasterio(
-            f"../data/external/population/{countries[country].lower()}_pd_2020_1km.tif",
+            os.path.join(
+                DATA_DIR,
+                f"external/population/{countries[country].lower()}_pd_2020_1km.tif",
+            ),
             masked=True,
         )
         .squeeze()
@@ -229,124 +228,6 @@ def weighted_aggregation(
         columns={f"{model}_weighted": f"{model}_index"}
     )
     return gdf
-
-
-def lee_etal(n_bins: int = None) -> pd.DataFrame:
-    """
-    Function for extracting McCallum's, Chi's, Yeh's and Lee's model predictions for all countries.
-    Extracts McCallum's, Chi's and Yeh's model predictions (raw/quintiles) at Lee's point locations.
-
-    Returns:
-        pd.DataFrame: point values for all countries
-    """
-    boundaries = utils.read_boundary()
-    models = pd.DataFrame()
-    for name in countries.keys():
-        boundary = boundaries[boundaries["country_name"] == name]
-        ds = lee_model(name, n_bins).to_dataset(name="Lee")
-        ds["smod"] = (
-            smod.rio.clip(boundary.geometry)
-            .rio.reproject_match(ds["Lee"])
-            .where(ds["Lee"].notnull())
-        )
-        ds["McCallum"] = (
-            mccallum_model(name, n_bins)
-            .rio.reproject_match(ds["Lee"])
-            .where(ds["Lee"].notnull())
-        )
-        ds["Chi"] = (
-            chi_model(name, n_bins)
-            .rio.reproject_match(ds["Lee"])
-            .where(ds["Lee"].notnull())
-        )
-        ds["Yeh"] = (
-            yeh_model(name, n_bins)
-            .rio.reproject_match(ds["Lee"])
-            .where(ds["Lee"].notnull())
-        )
-        ds = ds.to_dataframe()
-        ds.loc[:, "country_name"] = name
-        models = pd.concat([models, ds], ignore_index=True)
-    models = models.reset_index(drop=True).dropna(
-        subset=["McCallum", "Chi", "Yeh", "Lee"]
-    )
-    return models[["country_name", "smod", "McCallum", "Chi", "Yeh", "Lee"]]
-
-
-def mccallum_etal(n_bins: int = None) -> pd.DataFrame:
-    """
-    Function for extracting Chi's, Yeh's and McCallum's model predictions for all countries.
-    Extracts Chi's, Yeh's and McCallum's model predictions (raw/quintiles) at coincident
-    raster locations.
-
-    Args:
-        n_bins (int, optional): Number of bins for reclassification. Defaults to None for raw values.
-
-    Returns:
-        pd.DataFrame: raster values for all countries
-    """
-    boundaries = utils.read_boundary()
-    models = pd.DataFrame()
-    for name in countries.keys():
-        boundary = boundaries[boundaries["country_name"] == name]
-        ds = mccallum_model(name, n_bins).to_dataset(name="McCallum")
-        ds["smod"] = (
-            smod.rio.clip(boundary.geometry)
-            .rio.reproject_match(ds["McCallum"])
-            .where(ds["McCallum"].notnull())
-        )
-        ds["Chi"] = (
-            chi_model(name, n_bins)
-            .rio.reproject_match(ds["McCallum"])
-            .where(ds["McCallum"].notnull())
-        )
-        ds["Yeh"] = (
-            yeh_model(name, n_bins)
-            .rio.reproject_match(ds["McCallum"])
-            .where(ds["McCallum"].notnull())
-        )
-        ds = ds.to_dataframe()
-        ds.loc[:, "country_name"] = name
-        models = pd.concat([models, ds], ignore_index=True)
-    models = models.reset_index(drop=True).dropna(subset=["McCallum", "Chi", "Yeh"])
-    return models[["country_name", "smod", "McCallum", "Chi", "Yeh"]]
-
-
-def chi_yeh(n_bins: int = None) -> pd.DataFrame:
-    """
-    Function for extracting Chi's and Yeh's model predictions for all countries.
-    Extracts Chi's and Yeh's model predictions at coincident raster locations.
-
-    Args:
-        n_bins (int, optional): Number of bins for reclassification. Defaults to None.
-
-    Returns:
-        pd.DataFrame: raster values for all countries
-    """
-    boundaries = utils.read_boundary()
-    models = pd.DataFrame()
-    for name in countries.keys():
-        print("Processing ", name)
-        boundary = boundaries[boundaries["country_name"] == name]
-        ds = chi_model(name, n_bins).to_dataset(name="Chi")
-        # ds=utils.fix_dims(ds)
-        ds["smod"] = (
-            smod.rio.clip(boundary.geometry)
-            .rio.reproject_match(ds["Chi"])
-            .where(ds["Chi"].notnull())
-        )
-        # yeh=utils.rasterize_polygons(, 'Yeh')
-        ds["Yeh"] = (
-            yeh_model(name, n_bins)
-            .rio.reproject_match(ds["Chi"])
-            .where(ds["Chi"].notnull())
-        )
-        ds = ds.to_dataframe()
-        ds.loc[:, "country_name"] = name
-        models = pd.concat([models, ds], ignore_index=True)
-        print("Completed ", name)
-    models = models.reset_index(drop=True).dropna(subset=["Chi", "Yeh"])
-    return models[["country_name", "smod", "Chi", "Yeh"]]
 
 
 def coincident_pixels(
@@ -405,18 +286,21 @@ def generate_quantiles(raster: xr.DataArray, q: int = 3) -> xr.DataArray:
     Args:
         rasters (xr.DataArray): Raster for which quantiles are to be generated.
         q (int): Number of quantiles; e.g. 5 for quintiles. Defaults to 3 for terciles.
+
+    Returns:
+        xr.DataArray: DataArray with quantile labels as pixel values.
     """
     # calculate quantiles, ignoring NaN values
-    quantiles = raster.quantile(np.linspace(0, 1, q + 1)[1:-1], skipna=True)
+    quantiles = raster.quantile(np.linspace(0, 1, q + 1)[1:-1], skipna=True).values
     # flatten the original data array to apply digitize
     flat_data = raster.values.flatten()
     # assign bins based on the quantiles; +1 to make it 1-indexed
-    quantiles = np.digitize(flat_data, quantiles).astype(np.float32) + 1
+    quantiles = np.digitize(flat_data, quantiles, right=True).astype(np.float32) + 1
     # retain NaN values from the original data
     quantiles = np.where(np.isnan(flat_data), np.nan, quantiles)
     # reshape back to the original shape
     quantiles = quantiles.reshape(raster.shape)
-    # Creating a new DataArray with tercile labels
+    # Creating a new DataArray with quantile labels
     da = (
         xr.DataArray(
             quantiles,
@@ -426,6 +310,93 @@ def generate_quantiles(raster: xr.DataArray, q: int = 3) -> xr.DataArray:
         .rio.write_crs(raster.rio.crs)
         .rio.write_nodata(np.nan)
     )
+    return da
+
+
+def generate_weighted_quantiles(
+    raster: xr.DataArray, country: str, q: int = 3
+) -> xr.DataArray:
+    """
+    Generate weighted quantiles (e.g., terciles or quintiles) for a raster using
+    population weights from another raster (possibly with a different CRS).
+
+    Args:
+        raster (xr.DataArray): Raster with model predictions.
+        country (str): Name of the country.
+        q (int): Number of quantiles (e.g., 3 for terciles, 5 for quintiles).
+
+    Returns:
+        xr.DataArray: DataArray of quantile labels (1..q).
+    """
+    # prepare population data
+    if country not in countries.keys():
+        # aggregate population for all countries
+        popn = (
+            merge_arrays(
+                [
+                    rxr.open_rasterio(
+                        os.path.join(
+                            DATA_DIR,
+                            f"external/population/{countries[cntry].lower()}_pd_2020_1km.tif",
+                        ),
+                        masked=True,
+                    ).squeeze()
+                    for cntry in countries.keys()
+                ],
+                nodata=np.nan,
+            )
+            .rio.set_crs("EPSG:4326")
+            .rio.write_nodata(np.nan)
+        )
+    else:
+        popn = (
+            rxr.open_rasterio(
+                os.path.join(
+                    DATA_DIR,
+                    f"external/population/{countries[country].lower()}_pd_2020_1km.tif",
+                ),
+                masked=True,
+            )
+            .squeeze()
+            .rio.set_crs("EPSG:4326")
+            .rio.write_nodata(np.nan)
+        )
+    # match raster CRS and resolution
+    popn = popn.rio.reproject_match(raster, resampling=Resampling.bilinear)
+
+    # flatten arrays
+    values = raster.values.flatten()
+    weights = popn.values.flatten()
+
+    # mask out NaNs and invalid popn values
+    mask = (~np.isnan(values)) & (~np.isnan(weights)) & (weights > 0)
+    values = values[mask]
+    weights = weights[mask]
+
+    # weighted quantile thresholds
+    probs = np.linspace(0, 1, q + 1)[1:-1]
+    # sort values and calculate cummulative sum of weights
+    sorter = np.argsort(values)
+    values_sorted = values[sorter]
+    weights_sorted = weights[sorter]
+    cdf = np.cumsum(weights_sorted) / np.sum(weights_sorted)
+    thresholds = np.interp(probs, cdf, values_sorted)
+
+    # digitize original (unmasked) values
+    binned = np.digitize(raster.values, thresholds).astype(np.float32) + 1
+    binned = np.where(np.isnan(raster.values), np.nan, binned)
+
+    # return DataArray with quantile labels
+    da = (
+        xr.DataArray(
+            binned,
+            dims=[d for d in raster.dims if d != "model"],
+            coords={k: v for k, v in raster.coords.items() if k != "model"},
+        )
+        .rio.write_crs(raster.rio.crs)
+        .rio.write_nodata(np.nan)
+    )
+
     return da
 
 
@@ -451,147 +422,122 @@ def generate_quantiles_v(col: pd.Series, q: int = 3) -> pd.Series:
     return quantiles
 
 
-def spatial_alignment(country: str, raster_dir: str) -> xr.DataArray:
+def spatial_alignment(country: str, model_list: list = MODEL_NAMES) -> xr.DataArray:
     """
     Function to spatially align rasters and resample pixel sizes to a common resolution.
-    The function reprojects rasters to match Lee's maps (1.6km) and generates a mask for analysis.
+    The function reprojects rasters to match Lee's (1.6km) / Yeh's (6.72km) maps and generates a mask for analysis.
 
     Args:
         country (str): Name of the country for which the processing is done.
-        raster_dir (str): Directory where input rasters are stored.
+        models (list): List of model names to process. Defaults to MODEL_NAMES.
     Returns:
         xr.DataArray: Stacked rasters with spatial alignment.
     """
     rasters = dict()
-    for model in MODEL_NAMES:
+    for model in model_list:
+        # Path to ensemble models
+        if model == "Ensemble":
+            input_path = os.path.join(
+                INTERIM_DIR,
+                "raster_stacks",
+                "majority_ensemble",
+                f"{country}_ensemble.tif",
+            )
+        elif model.endswith("ensemble"):
+            input_path = os.path.join(
+                INTERIM_DIR,
+                "raster_stacks",
+                "leave-one-out",
+                f"{country}_{model}.tif",
+            )
+        else:
+            input_path = os.path.join(
+                INTERIM_DIR, "rasterized", f"{model}_{country}.tif"
+            )
         # read the raster for the model and country
         rasters[model] = (
             rxr.open_rasterio(
-                os.path.join(raster_dir, f"{model}_{country}.tif"),
+                input_path,
                 masked=True,
             )
             .squeeze()
             .drop("band")
         )
-    # spatial alignment and raster resampling to match Lee's maps, then stack along 'model' axis
+
+    # spatial alignment and raster resampling to match Lee's maps
+    for model in model_list:
+        if model in ["Yeh", "Chi"]:
+            rasters[model] = rasters[model].rio.reproject_match(
+                rasters["Lee"], resampling=Resampling.bilinear
+            )
+        elif model == "McCallum":
+            rasters[model] = rasters[model].rio.reproject_match(
+                rasters["Lee"], resampling=Resampling.nearest
+            )
+        elif model == "DHS":
+            rasters[model] = rasters[model].rio.reproject_match(
+                rasters[model_list[1]], resampling=Resampling.bilinear
+            )
+
+    # # try downsampling to Yeh's courser resolution
+    # for model in model_list:
+    #     if model in ["Lee", "Chi"]:
+    #         rasters[model] = rasters[model].rio.reproject_match(
+    #             rasters["Yeh"], resampling=Resampling.bilinear
+    #         )
+    #     elif model == "McCallum":
+    #         rasters[model] = rasters[model].rio.reproject_match(
+    #             rasters["Yeh"], resampling=Resampling.nearest
+    #         )
+    #     elif model == "DHS":
+    #         rasters[model] = rasters[model].rio.reproject_match(
+    #             rasters["Ensemble"], resampling=Resampling.bilinear
+    #         )
+    # stack along 'model' axis
     rasters = xr.concat(
-        [rasters[model_].rio.reproject_match(rasters["Lee"]) for model_ in MODEL_NAMES],
+        list(rasters.values()),
         dim="model",
-    ).assign_coords(model=MODEL_NAMES)
+    ).assign_coords(model=model_list)
 
     return rasters
 
 
-# def dhs_comparisons(model: str, n_bins: int = None) -> pd.DataFrame:
-#     """
-#     Function for extracting model predictions at DHS cluster points for all countries.
-#     The DHS data used is the latest available for the specified model.
-#     Extracts Yeh, Chi's and McCallum's model predictions (terciles/quintiles) at DHS
-#     cluster locations.
+def align_dhs(
+    dhs: xr.DataArray, smod: xr.DataArray, model_name: str, country: str
+) -> xr.DataArray:
+    """Aligns the DHS and SMOD rasters to the specified model raster.
 
-#     Args:
-#         n_bins (int, optional): Number of bins for reclassification. Defaults to None.
+    Args:
+        dhs (xr.DataArray): The DHS raster to align.
+        smod (xr.DataArray): The SMOD raster to align.
+        model_name (str): The name of the model raster to align to.
+        country (str): The name of the country being processed.
 
-#     Returns:
-#         pd.DataFrame: point values for all countries
-#     """
-#     boundaries = utils.read_boundary()
-#     dhs = rxr.open_rasterio(
-#         os.path.join(outputs, "DHS_reference", f"dhs_{model.lower()}_{n_bins}.tif"),
-#         masked=True,
-#     ).squeeze()
-#     models = pd.DataFrame()
-#     for name in countries.keys():
-#         boundary = boundaries[boundaries["country_name"] == name]
-#         ds = dhs.to_dataset(name="DHS").rio.clip(boundary.geometry)
-#         ds["smod"] = (
-#             smod.rio.clip(boundary.geometry)
-#             .rio.reproject_match(ds["DHS"])
-#             .where(ds["DHS"].notnull())
-#         )
-#         if model == "Chi":
-#             ds["Chi"] = (
-#                 chi_model(name, n_bins)
-#                 .rio.reproject_match(ds["DHS"])
-#                 .where(ds["DHS"].notnull())
-#             )
-#         elif model == "Lee":
-#             ds["Lee"] = (
-#                 lee_model(name, n_bins)
-#                 .rio.reproject_match(ds["DHS"])
-#                 .where(ds["DHS"].notnull())
-#             )
-#         elif model == "McCallum":
-#             ds["McCallum"] = (
-#                 mccallum_model(name, n_bins)
-#                 .rio.reproject_match(ds["DHS"])
-#                 .where(ds["DHS"].notnull())
-#             )
-#         elif model == "Yeh":
-#             ds["Yeh"] = (
-#                 yeh_model(name, n_bins)
-#                 .rio.reproject_match(ds["DHS"])
-#                 .where(ds["DHS"].notnull())
-#             )
-#         ds = ds.to_dataframe()
-#         ds.loc[:, "country_name"] = name
-#         models = pd.concat([models, ds], ignore_index=True)
-#     models = models.reset_index(drop=True).dropna(subset=["DHS", model])
-#     return models[["country_name", "smod", "DHS", model]]
+    Returns:
+        xr.DataArray: The aligned raster.
+    """
+    # read the model raster for the country
+    da = rxr.open_rasterio(
+        os.path.join(INTERIM_DIR, "rasterized", f"{model_name}_{country}.tif"),
+        masked=True,
+    ).squeeze()
 
+    smod = rxr.open_rasterio(
+        os.path.join(inputs, f"SMOD/{countries[country]}_smod.tif"), masked=True
+    ).squeeze()
 
-# def dhs_comparisons_latest(n_bins: int, majority_vote: str) -> pd.DataFrame:
-#     """
-#     Function for extracting model predictions at DHS cluster points for all countries.
-#     The DHS data used is the latest survey available for each country.
-#     Extracts Yeh, Chi's and McCallum's model predictions (terciles/quintiles) at DHS
-#     cluster locations.
+    # align the DHS and SMOD rasters to the model raster
+    dhs = dhs.rio.reproject_match(da, resampling=Resampling.bilinear).squeeze()
+    smod = smod.rio.reproject_match(da, resampling=Resampling.nearest).squeeze()
 
-#     Args:
-#         n_bins (int): Number of bins for reclassification.
+    da = xr.concat([da, dhs, smod], dim="model").assign_coords(
+        model=[model_name, "DHS", "smod"]
+    )
+    # # generate mask showing which pixels to include in the analysis (i.e., only where the DHS and model overlap)
+    # mask = coincident_pixels(da, unanimous_only=True)
 
-#     Returns:
-#         pd.DataFrame: point values for all countries
-#     """
-#     # ensemble=(rxr.open_rasterio(os.path.join(outputs, 'Ensemble_models', 'terciles', f'ensemble_model_{n_bins}.tif'), masked=True)
-#     #           .squeeze())
-#     ensemble = rxr.open_rasterio(
-#         os.path.join(
-#             outputs,
-#             "Ensemble_models_new",
-#             f"{majority_vote}",
-#             "all_countries_models.tif",
-#         ),
-#         masked=True,
-#     ).squeeze()
-#     boundaries = utils.read_boundary()
-#     models = pd.DataFrame()
-#     for name in countries.keys():
-#         print("Processing ", name)
-#         boundary = boundaries[boundaries["country_name"] == name]
-#         dhs = rxr.open_rasterio(
-#             os.path.join(
-#                 outputs, "DHS_reference", "terciles", f"{name}_dhs_{n_bins}.tif"
-#             ),
-#             masked=True,
-#         ).squeeze()
-#         ds = dhs.to_dataset(name="DHS").rio.clip(boundary.geometry)
-#         ds["smod"] = (
-#             smod.rio.clip(boundary.geometry)
-#             .rio.reproject_match(ds["DHS"])
-#             .where(ds["DHS"].notnull())
-#         )
-#         ds["Ensemble"] = (
-#             ensemble.rio.clip(boundary.geometry)
-#             .rio.reproject_match(ds["DHS"])
-#             .where(ds["DHS"].notnull())
-#         )
-
-#         ds = ds.to_dataframe()
-#         ds.loc[:, "country_name"] = name
-#         models = pd.concat([models, ds], ignore_index=True)
-#     models = models.dropna(subset=["smod", "DHS", "Ensemble"]).reset_index(drop=True)
-#     return models[["country_name", "smod", "DHS", "Ensemble"]]
+    # return da.where(mask.notnull())
+    return da
 
 
 if __name__ == "__main__":
