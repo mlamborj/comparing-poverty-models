@@ -20,9 +20,9 @@ countries = sampling.countries
 ############################################################################################
 # countries_list=iter(countries.keys())
 # country=next(countries_list)
-MODEL_NAMES.remove(
-    "McCallum"
-)  # consider only models with continuous-value wealth indices
+# MODEL_NAMES.remove(
+#     "McCallum"
+# )  # consider only models with continuous-value wealth indices
 
 for country in countries.keys():
     print(f"Processing {country}")

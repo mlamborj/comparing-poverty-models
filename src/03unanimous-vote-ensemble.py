@@ -18,9 +18,9 @@ countries = sampling.countries
 #### Calculate quantiles for each model on a country-by-country basis, then compare
 #### overlapping pixels across models for each country, generating spatial agreement maps
 ############################################################################################
-MODEL_NAMES.remove(
-    "McCallum"
-)  # consider only models with continuous-value wealth indices
+# MODEL_NAMES.remove(
+#     "McCallum"
+# )  # consider only models with continuous-value wealth indices
 
 for country in countries.keys():
     print(f"Processing {country}")

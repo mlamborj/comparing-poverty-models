@@ -22,10 +22,6 @@ smod = rxr.open_rasterio(SMOD_FILE, masked=True).squeeze()
 corr_stats = pd.DataFrame()
 class_stats = pd.DataFrame()
 
-MODEL_NAMES.remove(
-    "McCallum"
-)  # consider only models with continuous-value wealth indices
-
 for model in MODEL_NAMES:
     print(f"Processing performance metrics for {model}:")
     print("*" * 50)

@@ -11,7 +11,7 @@ countries = sampling.countries
 model_list = {
     "Chi": sampling.chi_model,
     "Lee": sampling.lee_model,
-    "McCallum": sampling.mccallum_model,
+    # "McCallum": sampling.mccallum_model,
     "Yeh": sampling.yeh_model,
     "DHS_contemporary": sampling.dhs_model_contemporary,
     "DHS": sampling.dhs_model_latest,

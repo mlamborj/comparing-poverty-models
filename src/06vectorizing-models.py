@@ -13,6 +13,7 @@ countries = sampling.countries
 ##########################################################################################
 #### Generate vector layers for each country with aggregated wealth indices for each model
 ##########################################################################################
+
 for country in countries.keys():
     print(f"Aggregating indices for {country}")
     print("*" * 50)

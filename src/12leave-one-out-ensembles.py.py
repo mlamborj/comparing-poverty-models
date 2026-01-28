@@ -15,11 +15,16 @@ countries = sampling.countries
 #### Determine pixels overlapping in at least 2 models and calculate quantiles for each model
 ############################################################################################
 # define model combinations for leave-one-out ensembles
+# combinations = {
+#     "CLM": "Chi_Lee_McCallum",
+#     "CLY": "Chi_Lee_Yeh",
+#     "CMY": "Chi_McCallum_Yeh",
+#     "LMY": "Lee_McCallum_Yeh",
+# }
 combinations = {
-    "CLM": "Chi_Lee_McCallum",
-    "CLY": "Chi_Lee_Yeh",
-    "CMY": "Chi_McCallum_Yeh",
-    "LMY": "Lee_McCallum_Yeh",
+    "CL": "Chi_Lee",
+    "CY": "Chi_Yeh",
+    "LY": "Lee_Yeh",
 }
 
 for country in countries.keys():
@@ -36,13 +41,8 @@ for country in countries.keys():
 
         da = rasters.sel(model=model_name).squeeze().drop("model")
         # calculate quantiles, ignoring McCallum's model
-        # quantiles[model_name] = (
-        #     da if model_name == "McCallum" else sampling.generate_quantiles(da, q=3)
-        # )
         quantiles[model_name] = (
-            da
-            if model_name == "McCallum"
-            else sampling.generate_weighted_quantiles(da, country, q=3)
+            da if model_name == "McCallum" else sampling.generate_quantiles(da, q=5)
         )
     # stack rasters along the 'model' dimension
     quantiles = (
@@ -72,7 +72,7 @@ print("All countries completed.")
 ############################################################################################
 #### Calculate model performance metrics against DHS data
 ############################################################################################
-out_path = os.path.join(PROCESSED_DIR, "pixel-wise/terciles/unpooled")
+out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled")
 class_stats = pd.DataFrame()
 
 for country in countries.keys():
@@ -96,7 +96,7 @@ for country in countries.keys():
             quantiles[model_name] = (
                 da
                 if model_name.endswith("ensemble")
-                else sampling.generate_weighted_quantiles(da, country, q=3)
+                else sampling.generate_quantiles(da, q=5)
             )
         # stack rasters along the 'model' dimension
         quantiles = (

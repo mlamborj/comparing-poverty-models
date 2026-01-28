@@ -37,10 +37,7 @@ for country in countries.keys():
         da = rasters.sel(model=model_name).squeeze().drop("model")
         # calculate quantiles, ignoring Ensemble model
         quantiles[model_name] = (
-            da
-            if model_name == "Ensemble"
-            # else sampling.generate_weighted_quantiles(da, country, q=3)
-            else sampling.generate_quantiles(da, q=5)
+            da if model_name == "Ensemble" else sampling.generate_quantiles(da, q=5)
         )
     # stack rasters along the 'model' dimension
     quantiles = (

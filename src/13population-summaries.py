@@ -21,8 +21,8 @@ ds = (
     rxr.open_rasterio(
         os.path.join(
             PROCESSED_DIR,
-            "pixel-wise/terciles/unpooled/majority",
-            "spatial_agreement_map.tif",
+            "pixel-wise/quintiles/unpooled/majority",
+            "spatial_agreement_map_m.tif",
         ),
         masked=True,
     )

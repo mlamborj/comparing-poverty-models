@@ -84,23 +84,26 @@ def calculate_mode_v(row: pd.Series, return_freq=False) -> float:
         float: The mode or mode frequency of the input data.
     """
     # calculate mode ignoring NaN values
-    mode = row.mode()
+    mode = row.mode(dropna=True)
     if return_freq:
         # logic to handle mode frequency
         if len(mode) == 1:
             counts = row.value_counts()
             # frequency of unanimous mode
-            return counts.loc[mode.iloc[0]]
+            return counts.loc[mode.iloc[0]] if row.notna().sum() >= 2 else np.nan
         elif len(mode) == 2:
             case = row.value_counts().iloc[0]
             # the 2 available models disagree or split agreement
             return 0 if case == 1 else 1.0
         else:
             # the 3 available models disagree
-            return 0
+            return 0 if row.notna().sum() > 0 else np.nan
     else:
         # logic to handle majority vote ensemble
-        return mode.iloc[0] if len(mode) == 1 else np.nan
+        if len(mode) == 1:
+            return mode.iloc[0] if row.notna().sum() >= 2 else np.nan
+        else:
+            return np.nan
 
 
 def unanimous_mode(da: xr.DataArray, dim="model") -> xr.DataArray:

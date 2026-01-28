@@ -25,9 +25,9 @@ for country in countries.keys():
         layer=f"{country}_models",
     )
     indices = [col for col in vectors.columns if col.endswith("index")]
-    # filter admin units to include in the analysis (i.e., at least 2 models present in a polygon)
+    # filter admin units to include in the analysis (i.e., all models present in a polygon)
     vectors["models"] = vectors[indices].notna().sum(axis=1)
-    mask = vectors["models"] >= 2
+    mask = vectors["models"] == 3
 
     print("Generating wealth quantiles for all models")
     # calculate quantiles at admin level for each model
@@ -36,11 +36,11 @@ for country in countries.keys():
     )
 
     ############################################################################################
-    #### Determine wealth class in overlapping admin units by majority vote and generate maps
+    #### Determine wealth class in overlapping admin units by unanimous vote and generate maps
     ############################################################################################
-    print("Calculating majority vote ensemble")
-    # determine majority class label (i.e., quantile value for majority of models)
-    vectors["majority"] = vectors[mask][MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
+    print("Calculating unanimous vote ensemble")
+    # determine unanimous class label (i.e., quantile value for all models)
+    vectors["unanimous"] = vectors[mask][MODEL_NAMES].apply(ma.calculate_mode_v, axis=1)
 
     ############################################################################################
     #### Determine spatial agreement of quantiles in overlapping admins and export
@@ -52,7 +52,7 @@ for country in countries.keys():
     )
     # export spatial agreement vector
     vectors.to_file(
-        os.path.join(INTERIM_DIR, "vectorized", "majority", "model_agreement.gpkg"),
+        os.path.join(INTERIM_DIR, "vectorized", "unanimous", "model_agreement.gpkg"),
         layer=f"{country}_models",
         driver="GPKG",
         index=False,
@@ -60,21 +60,23 @@ for country in countries.keys():
 print("All countries completed.")
 
 ####################################################################################
-#### Calculate summary statistics for majority-vote ensemble by country
+#### Calculate summary statistics for unanimous-vote ensemble by country
 ####################################################################################
 # merge all the country ensemble maps into a single dataframe
-out_path = os.path.join(PROCESSED_DIR, "admin-2/quintiles/unpooled/majority")
+out_path = os.path.join(PROCESSED_DIR, "admin-2/quintiles/unpooled/unanimous")
 vectors = pd.concat(
     [
         gpd.read_file(
-            os.path.join(INTERIM_DIR, "vectorized", "majority", "model_agreement.gpkg"),
+            os.path.join(
+                INTERIM_DIR, "vectorized", "unanimous", "model_agreement.gpkg"
+            ),
             layer=f"{country}_models",
         )
         for country in countries.keys()
     ]
 )
 vectors.to_file(os.path.join(out_path, "admin_ensembles.geojson"), driver="GeoJSON")
-print("Majority-vote ensemble map completed.")
+print("Unanimous-vote ensemble map completed.")
 
 print("Calculating summary statistics")
 
@@ -82,7 +84,7 @@ stats = {"ensemble_stats": pd.DataFrame(), "agreement_stats": pd.DataFrame()}
 country_list = list(countries.keys()) + ["overall"]
 
 for k, df in stats.items():
-    col = "majority" if k == "ensemble_stats" else "agreement"
+    col = "unanimous" if k == "ensemble_stats" else "agreement"
     classes = (
         # {1: "Poor", 2: "Average", 3: "Richer"}
         {
@@ -91,7 +93,7 @@ for k, df in stats.items():
             3: "Average",
             4: "Richer",
             5: "Richest",
-        }
+        }  # Extended to quintiles
         if k == "ensemble_stats"
         else {
             0: "No agreement",

@@ -38,10 +38,7 @@ for country in countries.keys():
             da = raster_pair.sel(model=model_name).squeeze().drop("model")
             # calculate quantiles, ignoring McCallum's model
             quantiles[model_name] = (
-                da
-                if model_name == "McCallum"
-                else sampling.generate_weighted_quantiles(da, country, q=3)
-                # else sampling.generate_quantiles(da, q=5)
+                da if model_name == "McCallum" else sampling.generate_quantiles(da, q=5)
             )
         # stack rasters along the 'model' dimension
         quantiles = (
@@ -65,7 +62,7 @@ print("All countries completed.")
 #### Calculate summary statistics for pairwise agreement by country
 ####################################################################################
 strata = {1: "rural", 2: "urban", None: "all"}
-out_path = os.path.join(PROCESSED_DIR, "pixel-wise/terciles/unpooled")
+out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled")
 print("Calculating summary statistics for the pairwise agreement")
 dff = pd.DataFrame()
 for pair in MODEL_PAIRS:
@@ -107,18 +104,18 @@ for pair in MODEL_PAIRS:
     proportions["agree"] = 100 - proportions[0]
     dff = pd.concat([dff, proportions.reset_index(drop=True)])
 dff = (
-    dff[["Country", "Cluster", "model_pair", 0, "agree", 1, 2, 3, "N"]]
-    # dff[["Country", 'Cluster', "model_pair", 0, "agree", 1, 2, 3, 4, 5, "N"]]
+    # dff[["Country", "Cluster", "model_pair", 0, "agree", 1, 2, 3, "N"]]
+    dff[["Country", "Cluster", "model_pair", 0, "agree", 1, 2, 3, 4, 5, "N"]]
     .rename(
-        columns={0: "disagree (0)", 1: "poor (1)", 2: "average (2)", 3: "richer (3)"}
-        # columns={
-        #     0: "disagree (0)",
-        #     1: "poorest (1)",
-        #     2: "poorer (2)",
-        #     3: "average (3)",
-        #     4: "richer (4)",
-        #     5: "richest (5)",
-        # }
+        # columns={0: "disagree (0)", 1: "poor (1)", 2: "average (2)", 3: "richer (3)"}
+        columns={
+            0: "disagree (0)",
+            1: "poorest (1)",
+            2: "poorer (2)",
+            3: "average (3)",
+            4: "richer (4)",
+            5: "richest (5)",
+        }
     )
     .fillna(0)
     .reset_index(drop=True)
