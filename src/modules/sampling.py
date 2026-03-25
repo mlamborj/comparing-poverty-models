@@ -231,7 +231,7 @@ def weighted_aggregation(
 
 
 def coincident_pixels(
-    da: xr.DataArray, unanimous_only: bool = False, dim="model"
+    da: xr.DataArray, full_overlap: bool = False, dim="model"
 ) -> xr.DataArray:
     """
     This function is for generating country mask based on concident pixels in the input rasters.
@@ -241,8 +241,8 @@ def coincident_pixels(
 
     Args:
         da (xr.DataArray): Stack of rasters to compare.
-        unanimous_only (bool, optional): Whether to return pixels where all models are present or at least 2 are present.
-            Set True for considering the unanimously present case. Defaults to False.
+        full_overlap (bool, optional): Whether to compare pixels where all models are present or where at least 2 are present.
+            Set True for considering the unanimously present case, and False for the partial overlap case. Defaults to False.
         dim (str, optional): Name of dimension along which rasters are stacked. Defaults to 'model'.
 
     Returns:
@@ -255,7 +255,7 @@ def coincident_pixels(
     def resolve_mode(ndarray):
         # Ignore NaN values
         valid_values = ndarray[~np.isnan(ndarray)]
-        if unanimous_only:
+        if full_overlap:
             if len(valid_values) != len(da.model):
                 return np.nan  # not all models present
         else:
@@ -422,7 +422,9 @@ def generate_quantiles_v(col: pd.Series, q: int = 3) -> pd.Series:
     return quantiles
 
 
-def spatial_alignment(country: str, model_list: list = MODEL_NAMES) -> xr.DataArray:
+def spatial_alignment(
+    country: str, model_list: list = MODEL_NAMES, resolution: str = "Lee"
+) -> xr.DataArray:
     """
     Function to spatially align rasters and resample pixel sizes to a common resolution.
     The function reprojects rasters to match Lee's (1.6km) / Yeh's (6.72km) maps and generates a mask for analysis.
@@ -430,6 +432,7 @@ def spatial_alignment(country: str, model_list: list = MODEL_NAMES) -> xr.DataAr
     Args:
         country (str): Name of the country for which the processing is done.
         models (list): List of model names to process. Defaults to MODEL_NAMES.
+        resolution (str): Name of the model whose resolution to match. Defaults to 'Lee'.
     Returns:
         xr.DataArray: Stacked rasters with spatial alignment.
     """
@@ -464,35 +467,40 @@ def spatial_alignment(country: str, model_list: list = MODEL_NAMES) -> xr.DataAr
             .drop("band")
         )
 
-    # spatial alignment and raster resampling to match Lee's maps
-    for model in model_list:
-        if model in ["Yeh", "Chi"]:
-            rasters[model] = rasters[model].rio.reproject_match(
-                rasters["Lee"], resampling=Resampling.bilinear
-            )
-        elif model == "McCallum":
-            rasters[model] = rasters[model].rio.reproject_match(
-                rasters["Lee"], resampling=Resampling.nearest
-            )
-        elif model == "DHS":
-            rasters[model] = rasters[model].rio.reproject_match(
-                rasters[model_list[1]], resampling=Resampling.bilinear
-            )
+    if resolution == "Lee":
+        # spatial alignment and raster resampling to match Lee's maps
+        for model in model_list:
+            if model in ["Yeh", "Chi"]:
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters["Lee"], resampling=Resampling.bilinear
+                )
+            elif model == "McCallum":
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters["Lee"], resampling=Resampling.nearest
+                )
+            elif model == "DHS":
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters[model_list[1]], resampling=Resampling.bilinear
+                )
 
-    # # try downsampling to Yeh's courser resolution
-    # for model in model_list:
-    #     if model in ["Lee", "Chi"]:
-    #         rasters[model] = rasters[model].rio.reproject_match(
-    #             rasters["Yeh"], resampling=Resampling.bilinear
-    #         )
-    #     elif model == "McCallum":
-    #         rasters[model] = rasters[model].rio.reproject_match(
-    #             rasters["Yeh"], resampling=Resampling.nearest
-    #         )
-    #     elif model == "DHS":
-    #         rasters[model] = rasters[model].rio.reproject_match(
-    #             rasters["Ensemble"], resampling=Resampling.bilinear
-    #         )
+    elif resolution == "Yeh":
+        # try downsampling to Yeh's courser resolution
+        for model in model_list:
+            if model in ["Lee", "Chi"]:
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters["Yeh"], resampling=Resampling.bilinear
+                )
+            elif model == "McCallum":
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters["Yeh"], resampling=Resampling.nearest
+                )
+            elif model == "DHS":
+                rasters[model] = rasters[model].rio.reproject_match(
+                    rasters["Ensemble"], resampling=Resampling.bilinear
+                )
+    else:
+        raise ValueError("Resolution must be either 'Lee' or 'Yeh'.")
+
     # stack along 'model' axis
     rasters = xr.concat(
         list(rasters.values()),

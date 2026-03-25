@@ -29,7 +29,7 @@ for country in countries.keys():
         x, y = pair.split("_")
         raster_pair = rasters.sel(model=[x, y])
         # generate mask showing which pixels to include in the analysis (i.e., only where the 2 models overlap)
-        mask = sampling.coincident_pixels(raster_pair, unanimous_only=True)
+        mask = sampling.coincident_pixels(raster_pair, full_overlap=True)
         # calculate quantiles for each model
         quantiles = dict()
         for model_name in [x, y]:

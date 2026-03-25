@@ -13,7 +13,7 @@ countries = sampling.countries
 ############################################################################################
 #### Determine pixels overlapping in the model pair and calculate model correlation
 ############################################################################################
-out_path = os.path.join(PROCESSED_DIR, "pixel-wise/terciles/unpooled")
+out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled")
 stats = pd.DataFrame()
 
 for country in countries.keys():
@@ -51,10 +51,11 @@ for country in countries.keys():
 # merge wealth class info
 wealth_classes = pd.read_csv(os.path.join(out_path, "Pairwise_wealth_classes.csv"))
 wealth_classes = pd.merge(
-    stats[stats["Cluster"] == "all"][["Country", "Models", "correlation"]],
+    stats[["Country", "Models", "Cluster", "correlation"]],
     wealth_classes,
-    left_on=["Country", "Models"],
-    right_on=["Country", "model_pair"],
+    how="right",
+    left_on=["Country", "Models", "Cluster"],
+    right_on=["Country", "model_pair", "Cluster"],
     validate="1:1",
 ).drop(columns=["model_pair"])
 

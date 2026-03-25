@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 def calculate_mode(da: xr.DataArray, dim="model", return_freq=False) -> xr.DataArray:
     """
     This function is for generating the Spatial Agreement map based on majority vote.
-    It compares pixel values from the 4 models and returns the number of models that
+    It compares pixel values from the 3 models and returns the number of models that
     agree on the same value (i.e., mode frequency). Comparison is only made if there
     are at least 2 non-NaN pixels, to determine a majority vote.
 
@@ -109,9 +109,9 @@ def calculate_mode_v(row: pd.Series, return_freq=False) -> float:
 def unanimous_mode(da: xr.DataArray, dim="model") -> xr.DataArray:
     """
     This function is for generating the ensemble map based on unanimous vote.
-    It compares pixel values from the 4 models and returns the class label only when all
-     4 models agree (i.e., mode value). Comparison is only made if all 4 models are not NaN
-     in the pixel.
+    It compares pixel values from the 3 models and returns the class label only when all
+     3 models agree (i.e., modal value). Comparison is only made in pixels where all 3 models
+     are present (i.e., not NaN).
 
     Args:
         da (xr.DataArray): Stack of rasters to compare.

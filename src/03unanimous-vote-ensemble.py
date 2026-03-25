@@ -26,9 +26,9 @@ for country in countries.keys():
     print(f"Processing {country}")
     print("*" * 50)
     # align rasters to each other and resample to the same resolution
-    rasters = sampling.spatial_alignment(country)
+    rasters = sampling.spatial_alignment(country, resolution="Lee")
     # generate mask showing which pixels to include in the analysis (i.e., all models overlapping)
-    mask = sampling.coincident_pixels(rasters, unanimous_only=True)
+    mask = sampling.coincident_pixels(rasters, full_overlap=True)
     # calculate quantiles for each model
     quantiles = dict()
     for model_name in MODEL_NAMES:
@@ -53,7 +53,7 @@ for country in countries.keys():
     # determine unanimous class label (i.e., pixel value with unanimous vote of models)
     ma.unanimous_mode(quantiles).rio.to_raster(
         os.path.join(
-            INTERIM_DIR, "raster_stacks/unanimous_ensemble", f"{country}_ensemble.tif"
+            INTERIM_DIR, "raster_stacks/full-overlap", f"{country}_ensemble.tif"
         )
     )
     ############################################################################################
@@ -62,9 +62,7 @@ for country in countries.keys():
     print("Calculating spatial agreement\n")
     # determine spatial agreement (i.e., no. of models in agreement per pixel)
     ma.calculate_mode(quantiles, return_freq=True).rio.to_raster(
-        os.path.join(
-            INTERIM_DIR, "raster_stacks/spatial_agreement_u", f"{country}_agrmnt.tif"
-        )
+        os.path.join(INTERIM_DIR, "raster_stacks/full-overlap", f"{country}_agrmnt.tif")
     )
 print("All countries completed.")
 
@@ -73,9 +71,9 @@ print("All countries completed.")
 ####################################################################################
 strata = {1: "rural", 2: "urban", None: "all"}
 # merge all the country ensemble maps into a single raster
-out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled/unanimous")
+out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled/full-overlap")
 raster_dir = glob(
-    os.path.join(INTERIM_DIR, "raster_stacks/unanimous_ensemble", "*_ensemble.tif")
+    os.path.join(INTERIM_DIR, "raster_stacks/full-overlap", "*_ensemble.tif")
 )
 rasters = merge_arrays(
     [(rxr.open_rasterio(raster, masked=True).squeeze()) for raster in raster_dir]
@@ -145,7 +143,7 @@ stats.to_csv(
 ####################################################################################
 # merge all the country agreement maps into a single raster
 raster_dir = glob(
-    os.path.join(INTERIM_DIR, "raster_stacks/spatial_agreement_u", "*_agrmnt.tif")
+    os.path.join(INTERIM_DIR, "raster_stacks/full-overlap", "*_agrmnt.tif")
 )
 rasters = merge_arrays(
     [rxr.open_rasterio(raster, masked=True).squeeze() for raster in raster_dir]
