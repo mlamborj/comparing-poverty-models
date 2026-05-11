@@ -9,61 +9,37 @@ This repository contains the code required to reproduce the figures, tables, and
 ## Raw data
 
 All the data used in these analyses are available from online repositories and can be downloaded for individual countries. 
-- Demographic and Health Surveys (DHS) can be obtained upon registration at <a href=https://dhsprogram.com/data/>
-- Relative wealth index (RWI) data from Chi et al.’s model are available at <a href=https://data.humdata.org/dataset/relative-wealth-index>
-- International wealth index (IWI) poverty maps by Lee and Braithwaite are publicly accessible at  <a href=https://doi.org/10.7910/DVN/5OGWYM>
-- Yeh et al.’s wealth index data can be found at  <a href=https://github.com/sustainlab-group/africa_poverty>
+- <a href=https://dhsprogram.com/data/>Demographic and Health Surveys (DHS) </a>can be obtained upon registration.
+- <a href=https://data.humdata.org/dataset/relative-wealth-index>Relative wealth index (RWI)</a> data by Chi et al.(2022).
+- <a href=https://doi.org/10.7910/DVN/5OGWYM>International wealth index (IWI) </a>poverty maps by Lee and Braithwaite (2022).
+- <a href=https://github.com/sustainlab-group/africa_poverty>Harmonized wealth index </a>by Yeh et al.’s(2020).
 
 ## Instructions
-To set up your environment variables, you need to duplicate the `.env.example` file and rename it to `.env`. You can do this manually or using the following terminal command:
-
-```bash
-cp .env.example .env # Linux, macOS, Git Bash, WSL
-copy .env.example .env # Windows Command Prompt
-```
-
-This command creates a copy of `.env.example` and names it `.env`, allowing you to configure your environment variables specific to your setup.
+Install the required packages from `requirements.txt` into a virtual environment.
+Download the source data from the links provided and extract into ./data/raw.
+Run the scripts in ./src/ in order from 1 - 12 to generate the data for figures.
+Run ./notebooks/Figures.ipynb to reproduce the figures in the article.
 
 
 ## Project Organization
 
 ```
 ├── data
-│   ├── external       <- Data from third party sources
-│   ├── interim        <- Intermediate data that has been transformed
-│   ├── processed      <- The final, canonical data sets for modeling
-│   └── raw            <- The original, immutable data dump
+│   ├── external       <- Data from third party sources.
+│   ├── interim        <- Intermediate data.
+│   ├── processed      <- The final datasets for reporting and generating figures.
+│   └── raw            <- Folders DHS, Chi, Lee and Yeh containing the source data.
 │
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`
+├── notebooks          <- Jupyter notebooks for generating figures
 │
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
+├── reports            <- Generated analysis
+│   └── figures        <- Generated figures to be used in the manuscript.
 │
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
+├── requirements.txt   <- The requirements file for reproducing the analysis environment.
 │
-└── src                         <- Source code for this project
+└── src                         <- Source code for this project.
     │
-    ├── __init__.py             <- Makes src a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── dataset.py              <- Scripts to download or generate data
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    │    
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    ├── plots.py                <- Code to create visualizations 
-    │
-    └── services                <- Service classes to connect with external platforms, tools, or APIs
-        └── __init__.py 
+    ├── config.py               <- Store variables and configuration
 ```
 
 --------
