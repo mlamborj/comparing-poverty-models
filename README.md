@@ -1,24 +1,20 @@
-# Data Project Template
+# Examining the consistency of Earth Observation-based Machine Learning models for predicting poverty in sub-Saharan Africa
 
 <a target="_blank" href="https://datalumina.com/">
     <img src="https://img.shields.io/badge/Datalumina-Project%20Template-2856f7" alt="Datalumina Project" />
 </a>
 
-## Cookiecutter Data Science
-This project template is a simplified version of the [Cookiecutter Data Science](https://cookiecutter-data-science.drivendata.org) template, created to suit the needs of Datalumina and made available as a GitHub template.
+This repository contains the code required to reproduce the figures, tables, and supplementary visualizations associated with the manuscript submitted by Mlambo et al. (2026).
 
-## Adjusting .gitignore
+## Raw data
 
-Ensure you adjust the `.gitignore` file according to your project needs. For example, since this is a template, the `/data/` folder is commented out and data will not be exlucded from source control:
+All the data used in these analyses are available from online repositories and can be downloaded for individual countries. 
+- Demographic and Health Surveys (DHS) can be obtained upon registration at <a href=https://dhsprogram.com/data/>
+- Relative wealth index (RWI) data from Chi et al.’s model are available at <a href=https://data.humdata.org/dataset/relative-wealth-index>
+- International wealth index (IWI) poverty maps by Lee and Braithwaite are publicly accessible at  <a href=https://doi.org/10.7910/DVN/5OGWYM>
+- Yeh et al.’s wealth index data can be found at  <a href=https://github.com/sustainlab-group/africa_poverty>
 
-```plaintext
-# exclude data from source control by default
-# /data/
-```
-
-Typically, you want to exclude this folder if it contains either sensitive data that you do not want to add to version control or large files.
-
-## Duplicating the .env File
+## Instructions
 To set up your environment variables, you need to duplicate the `.env.example` file and rename it to `.env`. You can do this manually or using the following terminal command:
 
 ```bash
@@ -32,21 +28,15 @@ This command creates a copy of `.env.example` and names it `.env`, allowing you 
 ## Project Organization
 
 ```
-├── LICENSE            <- Open-source license if one is chosen
-├── README.md          <- The top-level README for developers using this project
 ├── data
 │   ├── external       <- Data from third party sources
 │   ├── interim        <- Intermediate data that has been transformed
 │   ├── processed      <- The final, canonical data sets for modeling
 │   └── raw            <- The original, immutable data dump
 │
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
 ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
 │                         the creator's initials, and a short `-` delimited description, e.g.
 │                         `1.0-jqp-initial-data-exploration`
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials
 │
 ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
 │   └── figures        <- Generated graphics and figures to be used in reporting
