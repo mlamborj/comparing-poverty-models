@@ -1,0 +1,70 @@
+Country,Cluster,Poorest,Poorer,Average,Richer,Richest
+Angola,all,14.4,15.7,15.7,14.1,40.0
+Angola,rural,19.5,21.4,21.3,18.0,19.8
+Angola,urban,0.0,0.0,0.4,3.7,96.0
+Benin,all,13.8,16.1,14.4,14.6,41.1
+Benin,rural,18.0,21.0,17.9,17.6,25.6
+Benin,urban,0.2,1.1,2.8,5.5,90.3
+Burkina Faso,all,15.2,15.8,16.0,18.3,34.8
+Burkina Faso,rural,17.2,17.8,17.9,20.2,26.8
+Burkina Faso,urban,0.0,0.4,1.4,3.9,94.3
+Cameroon,all,12.1,13.3,14.3,18.7,41.6
+Cameroon,rural,14.0,15.8,16.9,21.7,31.7
+Cameroon,urban,0.5,1.7,2.6,5.3,90.1
+Cote d'Ivoire,all,13.3,13.8,13.6,16.2,43.0
+Cote d'Ivoire,rural,16.0,16.4,16.3,19.2,32.1
+Cote d'Ivoire,urban,0.0,0.1,0.7,1.6,97.6
+Democratic Republic of the Congo,all,11.8,14.9,16.8,18.3,38.1
+Democratic Republic of the Congo,rural,14.5,18.2,20.1,20.5,26.8
+Democratic Republic of the Congo,urban,0.4,1.0,3.7,9.0,85.8
+Ethiopia,all,14.1,16.8,18.8,19.8,30.5
+Ethiopia,rural,16.6,19.4,21.0,21.1,21.9
+Ethiopia,urban,0.3,2.4,6.7,13.1,77.5
+Ghana,all,13.2,13.5,13.3,18.0,41.9
+Ghana,rural,17.7,18.2,17.7,22.8,23.6
+Ghana,urban,0.0,0.2,0.6,4.2,95.0
+Guinea,all,12.8,14.6,16.3,17.6,38.7
+Guinea,rural,14.6,16.9,18.9,20.0,29.6
+Guinea,urban,0.0,0.2,0.0,2.2,97.5
+Kenya,all,10.4,13.0,13.9,19.5,43.2
+Kenya,rural,17.5,21.7,19.4,19.3,22.1
+Kenya,urban,1.7,2.5,7.2,20.0,68.6
+Malawi,all,14.9,16.9,16.6,18.4,33.1
+Malawi,rural,19.3,21.6,18.8,18.2,22.2
+Malawi,urban,5.2,6.5,11.8,18.7,57.8
+Mali,all,8.9,17.7,19.6,20.5,33.2
+Mali,rural,9.9,19.4,21.9,22.8,26.0
+Mali,urban,0.3,0.6,0.6,2.3,96.3
+Mozambique,all,14.6,16.5,17.4,15.9,35.6
+Mozambique,rural,17.7,20.0,20.8,18.1,23.5
+Mozambique,urban,0.3,0.4,1.7,4.6,93.0
+Nigeria,all,16.3,13.4,13.7,14.3,42.3
+Nigeria,rural,23.5,19.2,18.8,17.1,21.5
+Nigeria,urban,0.4,0.8,2.5,7.2,89.1
+Overall,all,14.1,14.8,15.6,17.5,37.9
+Overall,rural,17.7,18.3,18.6,19.6,25.8
+Overall,urban,2.2,3.3,5.4,10.5,78.6
+Rwanda,all,18.3,19.0,17.4,18.6,26.7
+Rwanda,rural,23.8,22.8,18.8,18.4,16.3
+Rwanda,urban,15.3,16.7,16.6,18.8,32.5
+Senegal,all,12.2,13.7,15.7,19.9,38.5
+Senegal,rural,14.5,16.2,18.3,22.9,28.1
+Senegal,urban,0.0,0.1,0.7,3.1,96.1
+Sierra Leone,all,16.5,15.7,16.1,17.7,34.0
+Sierra Leone,rural,18.2,17.7,18.2,19.6,26.2
+Sierra Leone,urban,0.6,0.6,0.6,2.2,95.9
+Tanzania,all,14.5,13.9,15.7,17.2,38.8
+Tanzania,rural,18.8,17.9,19.7,19.8,23.8
+Tanzania,urban,0.1,0.7,2.4,8.4,88.3
+Togo,all,15.9,14.8,15.2,17.7,36.5
+Togo,rural,20.0,18.5,18.7,21.2,21.6
+Togo,urban,0.2,0.6,1.7,5.0,92.5
+Uganda,all,16.6,15.9,15.5,19.8,32.1
+Uganda,rural,24.2,20.3,17.7,19.9,17.8
+Uganda,urban,4.1,8.5,11.8,19.5,56.1
+Zambia,all,10.7,13.4,15.0,16.8,44.1
+Zambia,rural,12.9,16.2,18.2,19.7,33.0
+Zambia,urban,0.0,0.4,0.5,2.8,96.4
+Zimbabwe,all,15.9,15.2,16.8,19.6,32.6
+Zimbabwe,rural,18.0,17.3,19.0,22.0,23.7
+Zimbabwe,urban,0.3,0.2,0.5,1.4,97.6

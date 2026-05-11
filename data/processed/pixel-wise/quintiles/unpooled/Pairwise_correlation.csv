@@ -1,0 +1,67 @@
+Country,Cluster,Chi_Yeh,Lee_Chi,Lee_Yeh
+Angola,all,0.40964,0.35173,0.79743
+Angola,rural,0.15263,0.25469,0.51136
+Angola,urban,0.6799,0.52582,0.65449
+Benin,all,0.53582,0.29361,0.5102
+Benin,rural,0.39494,0.10708,0.22016
+Benin,urban,0.7319,0.71767,0.72778
+Burkina Faso,all,0.28178,0.27135,0.44043
+Burkina Faso,rural,0.1634,0.20265,0.24166
+Burkina Faso,urban,0.79834,0.65576,0.67069
+Cameroon,all,0.15019,0.23149,0.64199
+Cameroon,rural,0.11759,0.21704,0.36031
+Cameroon,urban,0.00955,0.09705,0.65471
+Cote d'Ivoire,all,0.55393,0.54121,0.62989
+Cote d'Ivoire,rural,0.35749,0.47843,0.44481
+Cote d'Ivoire,urban,0.70976,0.57864,0.48848
+Democratic Republic of the Congo,all,0.48444,0.24746,0.62104
+Democratic Republic of the Congo,rural,0.17457,0.18011,0.38542
+Democratic Republic of the Congo,urban,0.75723,0.56107,0.72648
+Ethiopia,all,0.22401,0.18797,0.51243
+Ethiopia,rural,0.15709,0.14586,0.33229
+Ethiopia,urban,0.34218,0.14322,0.77868
+Ghana,all,0.64118,0.6692,0.75511
+Ghana,rural,0.43464,0.55789,0.52427
+Ghana,urban,0.73903,0.77757,0.75923
+Guinea,all,0.48491,0.31186,0.70704
+Guinea,rural,0.31702,0.23824,0.4581
+Guinea,urban,0.74387,0.78204,0.7068
+Kenya,all,0.51038,0.53791,0.61703
+Kenya,rural,0.34405,0.37749,0.45318
+Kenya,urban,0.57353,0.57687,0.64717
+Malawi,all,0.38586,0.18863,0.36206
+Malawi,rural,0.2845,0.09202,0.20852
+Malawi,urban,0.51377,0.33321,0.53517
+Mali,all,0.13131,0.06974,0.56835
+Mali,rural,0.06807,0.04416,0.3444
+Mali,urban,0.37794,0.29773,0.60054
+Mozambique,all,0.21635,0.1507,0.80567
+Mozambique,rural,0.12816,0.10858,0.61489
+Mozambique,urban,0.64483,0.51832,0.77597
+Nigeria,all,0.62162,0.46013,0.74151
+Nigeria,rural,0.40162,0.29417,0.46487
+Nigeria,urban,0.65386,0.66919,0.72234
+Rwanda,all,0.23864,0.42873,0.3047
+Rwanda,rural,0.1126,0.25066,0.22406
+Rwanda,urban,0.31832,0.50103,0.34129
+Senegal,all,0.47036,0.36614,0.54967
+Senegal,rural,0.33416,0.2705,0.32915
+Senegal,urban,0.72806,0.58051,0.50737
+Sierra Leone,all,0.32526,0.33243,0.44404
+Sierra Leone,rural,0.23095,0.26808,0.31542
+Sierra Leone,urban,0.68819,0.77055,0.58265
+Tanzania,all,0.26334,0.41159,0.61613
+Tanzania,rural,0.09733,0.29226,0.35779
+Tanzania,urban,0.58604,0.49251,0.77378
+Togo,all,0.46141,0.46475,0.65193
+Togo,rural,0.28051,0.31907,0.3967
+Togo,urban,0.77669,0.695,0.63781
+Uganda,all,0.29832,0.2272,0.50932
+Uganda,rural,0.22756,0.16523,0.27974
+Uganda,urban,0.27458,0.20591,0.63651
+Zambia,all,0.56905,0.38511,0.80734
+Zambia,rural,0.42134,0.28192,0.60547
+Zambia,urban,0.71732,0.52809,0.59911
+Zimbabwe,all,0.22982,0.25287,0.70398
+Zimbabwe,rural,0.14314,0.22043,0.44755
+Zimbabwe,urban,0.11215,0.0032,0.46861

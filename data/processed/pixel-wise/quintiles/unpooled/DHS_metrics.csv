@@ -1,0 +1,331 @@
+Country,Cluster,metric,Chi,Lee,Yeh,Ensemble
+Angola,all,accuracy,0.31773,0.47669,0.39024,0.67041
+Angola,all,correlation,0.44035,0.78101,0.58224,
+Angola,all,f1,0.33577,0.46746,0.41303,0.66443
+Angola,all,precision,0.40068,0.48981,0.46579,0.67794
+Angola,all,recall,0.31773,0.47669,0.39024,0.67041
+Angola,rural,accuracy,0.27636,0.33371,0.31661,0.4393
+Angola,rural,correlation,0.35375,0.56423,0.3849,
+Angola,rural,f1,0.30003,0.34378,0.32876,0.43244
+Angola,rural,precision,0.38312,0.39564,0.37983,0.45901
+Angola,rural,recall,0.27636,0.33371,0.31661,0.4393
+Angola,urban,accuracy,0.65873,0.8784,0.86,0.96491
+Angola,urban,correlation,0.59112,0.66873,0.79947,
+Angola,urban,f1,0.75121,0.82993,0.90044,0.96279
+Angola,urban,precision,0.88844,0.80295,0.9625,0.96714
+Angola,urban,recall,0.65873,0.8784,0.86,0.96491
+Benin,all,accuracy,0.25498,0.30003,0.36458,0.45797
+Benin,all,correlation,0.26533,0.40523,0.63465,
+Benin,all,f1,0.24421,0.28642,0.37407,0.49519
+Benin,all,precision,0.24808,0.28231,0.39,0.55908
+Benin,all,recall,0.25498,0.30003,0.36458,0.45797
+Benin,rural,accuracy,0.22071,0.24254,0.33036,0.35621
+Benin,rural,correlation,0.14378,0.23947,0.58787,
+Benin,rural,f1,0.219,0.23646,0.33792,0.3704
+Benin,rural,precision,0.22731,0.23523,0.35675,0.39703
+Benin,rural,recall,0.22071,0.24254,0.33036,0.35621
+Benin,urban,accuracy,0.48643,0.51387,0.60417,0.63556
+Benin,urban,correlation,0.49491,0.60856,0.78322,
+Benin,urban,f1,0.39698,0.45216,0.57384,0.72949
+Benin,urban,precision,0.38267,0.4741,0.55613,0.87481
+Benin,urban,recall,0.48643,0.51387,0.60417,0.63556
+Burkina Faso,all,accuracy,0.23675,0.35242,0.29412,0.46981
+Burkina Faso,all,correlation,0.12441,0.40395,0.38275,
+Burkina Faso,all,f1,0.25685,0.33947,0.35338,0.51392
+Burkina Faso,all,precision,0.28503,0.34147,0.46844,0.57886
+Burkina Faso,all,recall,0.23675,0.35242,0.29412,0.46981
+Burkina Faso,rural,accuracy,0.21692,0.29975,0.24688,0.33475
+Burkina Faso,rural,correlation,0.05829,0.26549,0.25092,
+Burkina Faso,rural,f1,0.23666,0.29251,0.2996,0.36922
+Burkina Faso,rural,precision,0.26512,0.29953,0.41966,0.42874
+Burkina Faso,rural,recall,0.21692,0.29975,0.24688,0.33475
+Burkina Faso,urban,accuracy,0.56347,0.74359,0.7561,0.81985
+Burkina Faso,urban,correlation,0.50015,0.55226,0.84965,
+Burkina Faso,urban,f1,0.58384,0.6647,0.79704,0.87992
+Burkina Faso,urban,precision,0.6065,0.62608,0.84553,0.95245
+Burkina Faso,urban,recall,0.56347,0.74359,0.7561,0.81985
+Cameroon,all,accuracy,0.27196,0.45812,0.2514,0.61864
+Cameroon,all,correlation,0.22021,0.78423,0.42582,
+Cameroon,all,f1,0.27178,0.42947,0.29511,0.66147
+Cameroon,all,precision,0.27494,0.42744,0.40334,0.72696
+Cameroon,all,recall,0.27196,0.45812,0.2514,0.61864
+Cameroon,rural,accuracy,0.2589,0.39872,0.17476,0.47236
+Cameroon,rural,correlation,0.22557,0.71899,0.24255,
+Cameroon,rural,f1,0.25508,0.38202,0.2031,0.5067
+Cameroon,rural,precision,0.2573,0.38795,0.32691,0.56819
+Cameroon,rural,recall,0.2589,0.39872,0.17476,0.47236
+Cameroon,urban,accuracy,0.35878,0.70297,0.73469,0.80645
+Cameroon,urban,correlation,0.04186,0.78176,0.76959,
+Cameroon,urban,f1,0.42434,0.60755,0.76543,0.86181
+Cameroon,urban,precision,0.54847,0.56111,0.83877,0.93583
+Cameroon,urban,recall,0.35878,0.70297,0.73469,0.80645
+Cote d'Ivoire,all,accuracy,0.28277,0.32129,0.44726,0.55484
+Cote d'Ivoire,all,correlation,0.27999,0.4789,0.70993,
+Cote d'Ivoire,all,f1,0.28104,0.30674,0.47542,0.59943
+Cote d'Ivoire,all,precision,0.28152,0.30915,0.56452,0.67529
+Cote d'Ivoire,all,recall,0.28277,0.32129,0.44726,0.55484
+Cote d'Ivoire,rural,accuracy,0.24418,0.27086,0.39713,0.41131
+Cote d'Ivoire,rural,correlation,0.17493,0.36089,0.63021,
+Cote d'Ivoire,rural,f1,0.24489,0.26685,0.41061,0.43978
+Cote d'Ivoire,rural,precision,0.24744,0.27639,0.51874,0.5045
+Cote d'Ivoire,rural,recall,0.24418,0.27086,0.39713,0.41131
+Cote d'Ivoire,urban,accuracy,0.71831,0.6936,0.82143,0.81744
+Cote d'Ivoire,urban,correlation,0.59396,0.43049,0.50137,
+Cote d'Ivoire,urban,f1,0.64591,0.58128,0.86444,0.89691
+Cote d'Ivoire,urban,precision,0.60278,0.50026,0.91667,0.99348
+Cote d'Ivoire,urban,recall,0.71831,0.6936,0.82143,0.81744
+Democratic Republic of the Congo,all,accuracy,0.27709,0.29454,0.33071,0.54065
+Democratic Republic of the Congo,all,correlation,0.30839,0.45973,0.41162,
+Democratic Republic of the Congo,all,f1,0.27971,0.29119,0.37301,0.55564
+Democratic Republic of the Congo,all,precision,0.31519,0.32981,0.43167,0.57791
+Democratic Republic of the Congo,all,recall,0.27709,0.29454,0.33071,0.54065
+Democratic Republic of the Congo,rural,accuracy,0.23352,0.2482,0.28313,0.34596
+Democratic Republic of the Congo,rural,correlation,0.16096,0.33675,0.24343,
+Democratic Republic of the Congo,rural,f1,0.25061,0.26385,0.32444,0.3513
+Democratic Republic of the Congo,rural,precision,0.29622,0.3156,0.38682,0.36449
+Democratic Republic of the Congo,rural,recall,0.23352,0.2482,0.28313,0.34596
+Democratic Republic of the Congo,urban,accuracy,0.53386,0.48951,0.65306,0.82698
+Democratic Republic of the Congo,urban,correlation,0.72785,0.70626,0.85622,
+Democratic Republic of the Congo,urban,f1,0.46479,0.42609,0.6876,0.85857
+Democratic Republic of the Congo,urban,precision,0.4498,0.41566,0.73299,0.89775
+Democratic Republic of the Congo,urban,recall,0.53386,0.48951,0.65306,0.82698
+Ethiopia,all,accuracy,0.24899,0.34301,0.30081,0.46341
+Ethiopia,all,correlation,0.25138,0.4259,0.34886,
+Ethiopia,all,f1,0.2503,0.33216,0.29761,0.49706
+Ethiopia,all,precision,0.26294,0.32755,0.29956,0.55186
+Ethiopia,all,recall,0.24899,0.34301,0.30081,0.46341
+Ethiopia,rural,accuracy,0.22818,0.27559,0.27465,0.31439
+Ethiopia,rural,correlation,0.21386,0.26759,0.25345,
+Ethiopia,rural,f1,0.23071,0.27309,0.27203,0.32575
+Ethiopia,rural,precision,0.24588,0.27464,0.27828,0.34879
+Ethiopia,rural,recall,0.22818,0.27559,0.27465,0.31439
+Ethiopia,urban,accuracy,0.37772,0.57471,0.4697,0.71091
+Ethiopia,urban,correlation,0.27767,0.70093,0.64973,
+Ethiopia,urban,f1,0.36579,0.51771,0.46531,0.79332
+Ethiopia,urban,precision,0.36962,0.4906,0.50569,0.91421
+Ethiopia,urban,recall,0.37772,0.57471,0.4697,0.71091
+Ghana,all,accuracy,0.31788,0.36495,0.36364,0.50666
+Ghana,all,correlation,0.41799,0.57729,0.7673,
+Ghana,all,f1,0.3217,0.38121,0.40716,0.54419
+Ghana,all,precision,0.33444,0.41133,0.50931,0.60074
+Ghana,all,recall,0.31788,0.36495,0.36364,0.50666
+Ghana,rural,accuracy,0.2412,0.27512,0.28511,0.33713
+Ghana,rural,correlation,0.25014,0.43078,0.66466,
+Ghana,rural,f1,0.24757,0.29476,0.31037,0.35075
+Ghana,rural,precision,0.26447,0.34229,0.42159,0.3739
+Ghana,rural,recall,0.2412,0.27512,0.28511,0.33713
+Ghana,urban,accuracy,0.70435,0.71346,0.66129,0.74482
+Ghana,urban,correlation,0.55555,0.66338,0.75125,
+Ghana,urban,f1,0.65254,0.63944,0.72461,0.82997
+Ghana,urban,precision,0.61093,0.60206,0.83333,0.94961
+Ghana,urban,recall,0.70435,0.71346,0.66129,0.74482
+Guinea,all,accuracy,0.26241,0.34705,0.3615,0.53435
+Guinea,all,correlation,0.27138,0.54181,0.54426,
+Guinea,all,f1,0.25598,0.3291,0.39181,0.56566
+Guinea,all,precision,0.25389,0.32601,0.45761,0.61054
+Guinea,all,recall,0.26241,0.34705,0.3615,0.53435
+Guinea,rural,accuracy,0.23585,0.29529,0.30052,0.39831
+Guinea,rural,correlation,0.18794,0.41732,0.39566,
+Guinea,rural,f1,0.23233,0.28541,0.31911,0.42258
+Guinea,rural,precision,0.23296,0.28965,0.40021,0.46396
+Guinea,rural,recall,0.23585,0.29529,0.30052,0.39831
+Guinea,urban,accuracy,0.72449,0.80597,0.95,0.88525
+Guinea,urban,correlation,0.64891,0.80564,0.83308,
+Guinea,urban,f1,0.69676,0.73394,0.92564,0.92751
+Guinea,urban,precision,0.67863,0.67372,0.9025,0.97952
+Guinea,urban,recall,0.72449,0.80597,0.95,0.88525
+Kenya,all,accuracy,0.33691,0.33558,0.31569,0.45952
+Kenya,all,correlation,0.45971,0.42919,0.5151,
+Kenya,all,f1,0.32779,0.33461,0.33283,0.48977
+Kenya,all,precision,0.32546,0.33673,0.37255,0.53948
+Kenya,all,recall,0.33691,0.33558,0.31569,0.45952
+Kenya,rural,accuracy,0.29666,0.29416,0.28243,0.4019
+Kenya,rural,correlation,0.39055,0.36206,0.34901,
+Kenya,rural,f1,0.29641,0.2957,0.29506,0.39933
+Kenya,rural,precision,0.29633,0.30256,0.33742,0.39744
+Kenya,rural,recall,0.29666,0.29416,0.28243,0.4019
+Kenya,urban,accuracy,0.40146,0.37713,0.3608,0.49896
+Kenya,urban,correlation,0.38087,0.41274,0.55678,
+Kenya,urban,f1,0.36824,0.37245,0.40085,0.56417
+Kenya,urban,precision,0.37356,0.38018,0.46286,0.68048
+Kenya,urban,recall,0.40146,0.37713,0.3608,0.49896
+Malawi,all,accuracy,0.23075,0.28563,0.29924,0.32278
+Malawi,all,correlation,0.09614,0.34699,0.34576,
+Malawi,all,f1,0.23099,0.28614,0.3016,0.34416
+Malawi,all,precision,0.23512,0.29135,0.30441,0.38383
+Malawi,all,recall,0.23075,0.28563,0.29924,0.32278
+Malawi,rural,accuracy,0.22044,0.26482,0.26746,0.30045
+Malawi,rural,correlation,0.04499,0.29411,0.25735,
+Malawi,rural,f1,0.22329,0.26833,0.27237,0.30402
+Malawi,rural,precision,0.22888,0.28048,0.27893,0.30965
+Malawi,rural,recall,0.22044,0.26482,0.26746,0.30045
+Malawi,urban,accuracy,0.26826,0.32305,0.39024,0.36506
+Malawi,urban,correlation,0.28102,0.43895,0.56034,
+Malawi,urban,f1,0.2418,0.30368,0.37305,0.43636
+Malawi,urban,precision,0.24632,0.30233,0.37096,0.60253
+Malawi,urban,recall,0.26826,0.32305,0.39024,0.36506
+Mali,all,accuracy,0.23781,0.40064,0.32143,0.6267
+Mali,all,correlation,0.18148,0.58412,0.43162,
+Mali,all,f1,0.25028,0.39594,0.34616,0.65335
+Mali,all,precision,0.26941,0.396,0.39522,0.6874
+Mali,all,recall,0.23781,0.40064,0.32143,0.6267
+Mali,rural,accuracy,0.22748,0.32436,0.28797,0.39919
+Mali,rural,correlation,0.15337,0.43345,0.33122,
+Mali,rural,f1,0.23699,0.32264,0.31417,0.42034
+Mali,rural,precision,0.25191,0.32553,0.36604,0.45094
+Mali,rural,recall,0.22748,0.32436,0.28797,0.39919
+Mali,urban,accuracy,0.43956,0.86895,0.85,0.91753
+Mali,urban,correlation,0.32202,0.64859,0.82857,
+Mali,urban,f1,0.58544,0.84269,0.85,0.95462
+Mali,urban,precision,0.91218,0.82841,0.85,0.99485
+Mali,urban,recall,0.43956,0.86895,0.85,0.91753
+Mozambique,all,accuracy,0.25981,0.46974,0.61364,0.6711
+Mozambique,all,correlation,0.24352,0.77992,0.8393,
+Mozambique,all,f1,0.28329,0.46673,0.62975,0.68704
+Mozambique,all,precision,0.34397,0.5445,0.66342,0.70792
+Mozambique,all,recall,0.25981,0.46974,0.61364,0.6711
+Mozambique,rural,accuracy,0.23251,0.38102,0.43103,0.50934
+Mozambique,rural,correlation,0.16369,0.64999,0.68961,
+Mozambique,rural,f1,0.25668,0.39609,0.45293,0.52183
+Mozambique,rural,precision,0.32545,0.5024,0.50849,0.54016
+Mozambique,rural,recall,0.23251,0.38102,0.43103,0.50934
+Mozambique,urban,accuracy,0.5368,0.77073,0.96667,0.90727
+Mozambique,urban,correlation,0.66613,0.77831,0.65384,
+Mozambique,urban,f1,0.59135,0.69152,0.95028,0.9271
+Mozambique,urban,precision,0.67939,0.63064,0.93444,0.95359
+Mozambique,urban,recall,0.5368,0.77073,0.96667,0.90727
+Nigeria,all,accuracy,0.32688,0.40745,0.36277,0.53029
+Nigeria,all,correlation,0.48666,0.68216,0.72687,
+Nigeria,all,f1,0.31341,0.38216,0.39623,0.61529
+Nigeria,all,precision,0.31093,0.38577,0.47221,0.7852
+Nigeria,all,recall,0.32688,0.40745,0.36277,0.53029
+Nigeria,rural,accuracy,0.27364,0.33229,0.27547,0.37722
+Nigeria,rural,correlation,0.35272,0.52548,0.54502,
+Nigeria,rural,f1,0.27038,0.33216,0.28706,0.41148
+Nigeria,rural,precision,0.27574,0.34757,0.36945,0.51945
+Nigeria,rural,recall,0.27364,0.33229,0.27547,0.37722
+Nigeria,urban,accuracy,0.52801,0.55524,0.58738,0.62145
+Nigeria,urban,correlation,0.54844,0.70156,0.85218,
+Nigeria,urban,f1,0.48158,0.45612,0.63887,0.74856
+Nigeria,urban,precision,0.45835,0.452,0.70748,0.95842
+Nigeria,urban,recall,0.52801,0.55524,0.58738,0.62145
+Rwanda,all,accuracy,0.23237,0.2506,0.26316,0.27886
+Rwanda,all,correlation,0.13699,0.18947,0.17904,
+Rwanda,all,f1,0.2315,0.25079,0.26048,0.28325
+Rwanda,all,precision,0.23267,0.2516,0.25882,0.28905
+Rwanda,all,recall,0.23237,0.2506,0.26316,0.27886
+Rwanda,rural,accuracy,0.21697,0.23186,0.2585,0.24939
+Rwanda,rural,correlation,0.08876,0.13691,0.16353,
+Rwanda,rural,f1,0.21752,0.23171,0.25823,0.24527
+Rwanda,rural,precision,0.2202,0.23563,0.26448,0.24542
+Rwanda,rural,recall,0.21697,0.23186,0.2585,0.24939
+Rwanda,urban,accuracy,0.24331,0.25973,0.26609,0.29373
+Rwanda,urban,correlation,0.17006,0.21648,0.17039,
+Rwanda,urban,f1,0.23849,0.25775,0.26666,0.30506
+Rwanda,urban,precision,0.24309,0.25864,0.27328,0.32394
+Rwanda,urban,recall,0.24331,0.25973,0.26609,0.29373
+Senegal,all,accuracy,0.29058,0.41638,0.53488,0.54496
+Senegal,all,correlation,0.3154,0.66671,0.81036,
+Senegal,all,f1,0.28265,0.40524,0.51591,0.57053
+Senegal,all,precision,0.2783,0.41452,0.50835,0.60517
+Senegal,all,recall,0.29058,0.41638,0.53488,0.54496
+Senegal,rural,accuracy,0.23916,0.33843,0.40678,0.43322
+Senegal,rural,correlation,0.16244,0.55527,0.67617,
+Senegal,rural,f1,0.2356,0.33941,0.38457,0.44973
+Senegal,rural,precision,0.23583,0.35978,0.39091,0.47371
+Senegal,rural,recall,0.23916,0.33843,0.40678,0.43322
+Senegal,urban,accuracy,0.70619,0.80457,0.81481,0.81799
+Senegal,urban,correlation,0.40639,0.51345,0.72344,
+Senegal,urban,f1,0.6969,0.72717,0.81975,0.88287
+Senegal,urban,precision,0.68865,0.67747,0.83165,0.96211
+Senegal,urban,recall,0.70619,0.80457,0.81481,0.81799
+Sierra Leone,all,accuracy,0.23126,0.27764,0.26132,0.37005
+Sierra Leone,all,correlation,0.15591,0.30215,0.38061,
+Sierra Leone,all,f1,0.23073,0.27624,0.27972,0.38437
+Sierra Leone,all,precision,0.2306,0.27579,0.31565,0.40693
+Sierra Leone,all,recall,0.23126,0.27764,0.26132,0.37005
+Sierra Leone,rural,accuracy,0.21434,0.25485,0.2381,0.31031
+Sierra Leone,rural,correlation,0.10288,0.23927,0.33228,
+Sierra Leone,rural,f1,0.21445,0.25502,0.25262,0.31735
+Sierra Leone,rural,precision,0.21486,0.25582,0.2849,0.33016
+Sierra Leone,rural,recall,0.21434,0.25485,0.2381,0.31031
+Sierra Leone,urban,accuracy,0.66879,0.68773,0.71429,0.76923
+Sierra Leone,urban,correlation,0.60004,0.62702,0.73626,
+Sierra Leone,urban,f1,0.62589,0.61278,0.77381,0.84568
+Sierra Leone,urban,precision,0.59166,0.62242,0.84416,0.95394
+Sierra Leone,urban,recall,0.66879,0.68773,0.71429,0.76923
+Tanzania,all,accuracy,0.27497,0.36552,0.3346,0.57452
+Tanzania,all,correlation,0.32255,0.60742,0.49829,
+Tanzania,all,f1,0.26277,0.34716,0.3288,0.61659
+Tanzania,all,precision,0.29043,0.36979,0.37571,0.67934
+Tanzania,all,recall,0.27497,0.36552,0.3346,0.57452
+Tanzania,rural,accuracy,0.23921,0.2624,0.25822,0.41338
+Tanzania,rural,correlation,0.19746,0.37814,0.3051,
+Tanzania,rural,f1,0.23804,0.26683,0.25345,0.44096
+Tanzania,rural,precision,0.27538,0.30905,0.31181,0.49063
+Tanzania,rural,recall,0.23921,0.2624,0.25822,0.41338
+Tanzania,urban,accuracy,0.50333,0.61341,0.66,0.75661
+Tanzania,urban,correlation,0.58084,0.68323,0.7576,
+Tanzania,urban,f1,0.44638,0.52873,0.64776,0.81925
+Tanzania,urban,precision,0.43271,0.60558,0.65198,0.90291
+Tanzania,urban,recall,0.50333,0.61341,0.66,0.75661
+Togo,all,accuracy,0.23677,0.29123,0.33019,0.39718
+Togo,all,correlation,0.17702,0.36044,0.61562,
+Togo,all,f1,0.2285,0.28131,0.33945,0.41113
+Togo,all,precision,0.22682,0.27571,0.35652,0.43017
+Togo,all,recall,0.23677,0.29123,0.33019,0.39718
+Togo,rural,accuracy,0.21156,0.23508,0.28022,0.29146
+Togo,rural,correlation,0.07429,0.21589,0.51627,
+Togo,rural,f1,0.2094,0.23412,0.28857,0.29047
+Togo,rural,precision,0.21054,0.23339,0.31707,0.29062
+Togo,rural,recall,0.21156,0.23508,0.28022,0.29146
+Togo,urban,accuracy,0.49012,0.55213,0.63333,0.68736
+Togo,urban,correlation,0.59385,0.52303,0.82692,
+Togo,urban,f1,0.39279,0.43996,0.5991,0.78173
+Togo,urban,precision,0.36421,0.39766,0.60317,0.91655
+Togo,urban,recall,0.49012,0.55213,0.63333,0.68736
+Uganda,all,accuracy,0.26476,0.34152,0.38554,0.43302
+Uganda,all,correlation,0.28582,0.44788,0.59481,
+Uganda,all,f1,0.26359,0.35018,0.3927,0.44936
+Uganda,all,precision,0.26855,0.36404,0.40696,0.47207
+Uganda,all,recall,0.26476,0.34152,0.38554,0.43302
+Uganda,rural,accuracy,0.25179,0.30736,0.26923,0.32888
+Uganda,rural,correlation,0.25075,0.37295,0.32904,
+Uganda,rural,f1,0.25433,0.32001,0.2796,0.32794
+Uganda,rural,precision,0.2651,0.34301,0.30951,0.33278
+Uganda,rural,recall,0.25179,0.30736,0.26923,0.32888
+Uganda,urban,accuracy,0.29322,0.38587,0.51261,0.52721
+Uganda,urban,correlation,0.30074,0.50743,0.80484,
+Uganda,urban,f1,0.2867,0.37876,0.50829,0.57052
+Uganda,urban,precision,0.29341,0.37787,0.53267,0.64195
+Uganda,urban,recall,0.29322,0.38587,0.51261,0.52721
+Zambia,all,accuracy,0.31013,0.46089,0.38889,0.69624
+Zambia,all,correlation,0.37846,0.71182,0.64474,
+Zambia,all,f1,0.30773,0.44305,0.41002,0.71945
+Zambia,all,precision,0.31695,0.44231,0.45341,0.74968
+Zambia,all,recall,0.31013,0.46089,0.38889,0.69624
+Zambia,rural,accuracy,0.27596,0.38086,0.32251,0.55764
+Zambia,rural,correlation,0.28825,0.60563,0.53074,
+Zambia,rural,f1,0.27617,0.36908,0.33728,0.57747
+Zambia,rural,precision,0.28895,0.37526,0.38837,0.6054
+Zambia,rural,recall,0.27596,0.38086,0.32251,0.55764
+Zambia,urban,accuracy,0.75728,0.8008,0.90909,0.90102
+Zambia,urban,correlation,0.51436,0.57613,0.75101,
+Zambia,urban,f1,0.75642,0.75088,0.91636,0.93316
+Zambia,urban,precision,0.75631,0.72536,0.93636,0.97072
+Zambia,urban,recall,0.75728,0.8008,0.90909,0.90102
+Zimbabwe,all,accuracy,0.27251,0.40879,0.42475,0.57382
+Zimbabwe,all,correlation,0.30691,0.69687,0.63191,
+Zimbabwe,all,f1,0.26903,0.37997,0.40299,0.57941
+Zimbabwe,all,precision,0.28245,0.38677,0.4167,0.59454
+Zimbabwe,all,recall,0.27251,0.40879,0.42475,0.57382
+Zimbabwe,rural,accuracy,0.25456,0.32092,0.35496,0.4279
+Zimbabwe,rural,correlation,0.25686,0.54138,0.49009,
+Zimbabwe,rural,f1,0.25817,0.31288,0.33043,0.43285
+Zimbabwe,rural,precision,0.28114,0.34304,0.34597,0.45137
+Zimbabwe,rural,recall,0.25456,0.32092,0.35496,0.4279
+Zimbabwe,urban,accuracy,0.55122,0.89306,0.91892,0.97204
+Zimbabwe,urban,correlation,0.10703,0.41324,0.47179,
+Zimbabwe,urban,f1,0.64137,0.84536,0.91892,0.98053
+Zimbabwe,urban,precision,0.78881,0.80569,0.91892,0.98917
+Zimbabwe,urban,recall,0.55122,0.89306,0.91892,0.97204

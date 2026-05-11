@@ -1,0 +1,70 @@
+Country,Cluster,No agreement,2 models agree,3 models agree
+Angola,urban,25.0,47.2,27.8
+Angola,all,66.2,30.4,3.4
+Angola,rural,71.8,27.7,0.5
+Benin,urban,26.7,43.2,30.1
+Benin,rural,70.7,27.7,1.5
+Benin,all,65.8,29.6,4.5
+Burkina Faso,all,70.0,27.9,2.1
+Burkina Faso,urban,26.2,47.4,26.4
+Burkina Faso,rural,72.2,26.9,0.9
+Cameroon,all,69.8,28.7,1.5
+Cameroon,urban,38.7,50.2,11.1
+Cameroon,rural,72.7,26.7,0.6
+Cote d'Ivoire,urban,18.1,69.6,12.2
+Cote d'Ivoire,rural,68.0,31.6,0.4
+Cote d'Ivoire,all,64.4,34.3,1.2
+Democratic Republic of the Congo,all,72.7,26.6,0.8
+Democratic Republic of the Congo,urban,44.8,49.0,6.2
+Democratic Republic of the Congo,rural,75.6,24.2,0.2
+Ethiopia,all,73.2,25.7,1.0
+Ethiopia,urban,60.3,33.9,5.8
+Ethiopia,rural,74.7,24.8,0.5
+Ghana,urban,18.9,56.4,24.6
+Ghana,all,59.1,36.9,4.0
+Ghana,rural,65.0,34.0,1.0
+Guinea,all,70.6,27.1,2.4
+Guinea,urban,13.8,46.0,40.2
+Guinea,rural,73.1,26.2,0.7
+Kenya,all,62.1,33.6,4.2
+Kenya,rural,67.5,31.2,1.3
+Kenya,urban,52.9,37.8,9.4
+Malawi,urban,48.8,39.5,11.7
+Malawi,all,62.7,33.3,4.0
+Malawi,rural,66.4,31.7,1.9
+Mali,rural,76.0,23.4,0.6
+Mali,urban,33.9,48.6,17.5
+Mali,all,74.4,24.4,1.2
+Mozambique,all,72.3,26.1,1.6
+Mozambique,rural,75.1,24.4,0.5
+Mozambique,urban,39.8,42.8,17.4
+Nigeria,rural,71.4,28.1,0.5
+Nigeria,urban,38.2,48.9,12.9
+Nigeria,all,65.7,31.7,2.6
+Overall,all,67.5,29.9,2.6
+Overall,rural,71.2,27.9,1.0
+Overall,urban,43.2,43.2,13.6
+Rwanda,rural,57.0,39.7,3.3
+Rwanda,urban,45.1,44.6,10.3
+Rwanda,all,50.4,42.2,7.3
+Senegal,rural,69.7,28.6,1.7
+Senegal,urban,15.9,42.5,41.5
+Senegal,all,66.5,29.5,4.0
+Sierra Leone,urban,17.4,43.3,39.4
+Sierra Leone,rural,68.4,29.8,1.8
+Sierra Leone,all,66.1,30.5,3.4
+Tanzania,all,68.0,29.1,2.9
+Tanzania,urban,39.1,42.6,18.3
+Tanzania,rural,72.0,27.1,0.9
+Togo,all,63.5,32.0,4.5
+Togo,urban,21.6,42.7,35.7
+Togo,rural,68.0,30.8,1.2
+Uganda,rural,72.6,26.6,0.9
+Uganda,all,69.3,28.5,2.1
+Uganda,urban,61.7,33.1,5.2
+Zambia,all,65.3,31.2,3.5
+Zambia,urban,14.7,48.5,36.8
+Zambia,rural,69.1,29.9,1.0
+Zimbabwe,rural,73.0,26.4,0.6
+Zimbabwe,urban,20.1,55.4,24.5
+Zimbabwe,all,70.7,27.6,1.7
