@@ -7,14 +7,16 @@ import pandas as pd
 import rasterio as rio
 import rioxarray as rxr
 import xarray as xr
-from rasterio import MemoryFile, features, transform
+from rasterio import features, transform
 from rasterstats import zonal_stats
 from shapely.geometry import Polygon
 
 from config import COUNTRIES_FILE, GADM_FILE, RAW_DIR, SMOD_FILE
 
 countries = pd.read_csv(COUNTRIES_FILE)
-countries = dict(zip(countries["name"], countries["alpha-3"]))
+# valid_countries = countries[countries["is_validation"] == 1]
+# valid_countries = dict(zip(valid_countries["name"], valid_countries["alpha-2"]))
+# countries = dict(zip(countries["name"], countries["alpha-3"]))
 
 
 def read_boundary(country_name: str = None, admin_level: int = 0) -> gpd.GeoDataFrame:

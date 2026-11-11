@@ -16,6 +16,8 @@ from . import utils
 inputs = DATA_DIR / "raw"
 
 countries = utils.countries
+countries = dict(zip(countries["name"], countries["alpha-3"]))
+# valid_countries = utils.valid_countries
 # smod = utils.smod
 
 
@@ -153,19 +155,25 @@ def dhs_model_contemporary(model_name: str, country_name: str = None) -> xr.Data
     return utils.rasterize_polygons(dhs, "DHS", resolution=0.018)  # ~2km resolution
 
 
-def dhs_model_latest(country_name: str) -> xr.DataArray:
+def dhs_model(model_name: str = None) -> xr.DataArray:
     """
-    Function for loading latest DHS data for respective countries.
-    The DHS data is latest as at 2022.
+    Function for rasterizing DHS data for the respective countries. If model_name is specified,
+    the function will load the DHS data that was latest at the time the model was published.
+    If model_name is None, the function will load the latest DHS data for all countries as at 2026.
 
     Args:
-        country_name (str): Name of the country.
+        model_name (str, optional): Name of the model. Determines the DHS survey year to compare with.
 
     Returns:
         xr.DataArray: rasterized DHS clusters where pixel value is DHS relative wealth index.
     """
     # load data from DHS
-    dhs = pd.read_csv(os.path.join(inputs, "DHS", f"{country_name.lower()}.csv"))
+    dhs_path = (
+        os.path.join(inputs, "DHS", "contemporary", f"DHS_{model_name}.csv")
+        if model_name is not None
+        else os.path.join(inputs, "DHS", "latest", "DHS_latest.csv")
+    )
+    dhs = pd.read_csv(dhs_path)
     dhs = dhs.rename(columns={"wealth_index": "DHS"})
     dhs = gpd.GeoDataFrame(
         dhs[["urban_rural", "DHS"]],
@@ -455,7 +463,11 @@ def spatial_alignment(
             )
         else:
             input_path = os.path.join(
-                INTERIM_DIR, "rasterized", f"{model}_{country}.tif"
+                # INTERIM_DIR, "rasterized", f"{model}_{country}.tif"
+                INTERIM_DIR,
+                "rasterized",
+                "DHS",
+                "DHS_latest.tif",
             )
         # read the raster for the model and country
         rasters[model] = (
@@ -525,8 +537,19 @@ def align_dhs(
         xr.DataArray: The aligned raster.
     """
     # read the model raster for the country
+    if model_name == "Ensemble":
+        raster_path = os.path.join(
+            INTERIM_DIR,
+            "raster_stacks",
+            "majority_ensemble",
+            f"{country}_ensemble.tif",
+        )
+    else:
+        raster_path = os.path.join(
+            INTERIM_DIR, "rasterized", f"{model_name}_{country}.tif"
+        )
     da = rxr.open_rasterio(
-        os.path.join(INTERIM_DIR, "rasterized", f"{model_name}_{country}.tif"),
+        raster_path,
         masked=True,
     ).squeeze()
 

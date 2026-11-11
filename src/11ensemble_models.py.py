@@ -9,32 +9,31 @@ from modules import model_agreement as ma
 # custom imports
 from modules import sampling, utils
 
-countries = sampling.countries
+countries = utils.countries["name"].to_list()
 
 ############################################################################################
 #### Calculate model performance metrics against DHS data
 ############################################################################################
 out_path = os.path.join(PROCESSED_DIR, "pixel-wise/quintiles/unpooled")
 
-# corr_stats = pd.DataFrame()
 class_stats = pd.DataFrame()
 
 model_list = ["DHS", "Ensemble"]
 
-for country in countries.keys():
+for country in countries:
     print(f"Processing {country}:")
     print("*" * 50)
 
     # align rasters to each other and resample to the same resolution
     rasters = sampling.spatial_alignment(country, model_list=model_list)
     # generate mask showing which pixels to include in the analysis (i.e., only where the 2 models overlap)
-    mask = sampling.coincident_pixels(rasters, unanimous_only=True)
+    mask = sampling.coincident_pixels(rasters, full_overlap=True)
     # calculate quantiles for DHS model
     quantiles = dict()
     for model_name in model_list:
         print(f"Generating wealth quantiles for {model_name}")
 
-        da = rasters.sel(model=model_name).squeeze().drop("model")
+        da = rasters.sel(model=model_name).squeeze().drop_vars("model")
         # calculate quantiles, ignoring Ensemble model
         quantiles[model_name] = (
             da if model_name == "Ensemble" else sampling.generate_quantiles(da, q=5)
@@ -76,7 +75,7 @@ stats = (
 
 # combine with base model metrics
 base_models_stats = pd.read_csv(
-    os.path.join(PROCESSED_DIR, out_path, "DHS_metrics.csv")
+    os.path.join(PROCESSED_DIR, out_path, "DHS_metrics_test.csv")
 )
 stats = pd.merge(
     base_models_stats,
@@ -86,7 +85,7 @@ stats = pd.merge(
     validate="1:1",
 )
 stats.to_csv(
-    os.path.join(out_path, "DHS_metrics.csv"),
+    os.path.join(out_path, "DHS_metrics_test.csv"),
     index=False,
 )
 

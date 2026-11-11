@@ -8,9 +8,9 @@ from config import SMOD_FILE, INTERIM_DIR, MODEL_NAMES, PROCESSED_DIR
 from modules import model_agreement as ma
 
 # custom imports
-from modules import sampling
+from modules import sampling, utils
 
-countries = sampling.countries
+countries = utils.countries["name"].to_list()
 
 ############################################################################################
 #### Calculate model performance metrics against DHS data
@@ -22,16 +22,17 @@ smod = rxr.open_rasterio(SMOD_FILE, masked=True).squeeze()
 corr_stats = pd.DataFrame()
 class_stats = pd.DataFrame()
 
-for model in MODEL_NAMES:
-    print(f"Processing performance metrics for {model}:")
+for model in MODEL_NAMES + ["Ensemble"]:
     print("*" * 50)
-    # load DHS raster for the model
+    print(f"Processing metrics for {model}:")
+    print("*" * 50)
+    # load DHS raster (contemporary to the model year) for comparison
     dhs = rxr.open_rasterio(
-        os.path.join(INTERIM_DIR, "rasterized", f"DHS_{model}.tif"), masked=True
+        os.path.join(INTERIM_DIR, "rasterized", "DHS", f"DHS_{model}.tif"), masked=True
     ).squeeze()
 
-    for country in countries.keys():
-        print(f"Processing {country}:")
+    for country in countries:
+        print(f"{country}")
 
         rasters = []
         aligned = sampling.align_dhs(dhs, smod=smod, model_name=model, country=country)
@@ -45,12 +46,12 @@ for model in MODEL_NAMES:
         )[[model, "DHS", "smod"]]
 
         # generate mask showing which pixels to include in the analysis (i.e., all models overlapping)
-        mask = sampling.coincident_pixels(aligned, unanimous_only=True)
+        mask = sampling.coincident_pixels(aligned, full_overlap=True)
 
-        # calculate quantiles, ignoring McCallum's model
+        # calculate quantiles, ignoring Ensemble model
         for name in aligned.model.values:
-            ras = aligned.sel(model=name).drop("model")
-            if name in ["McCallum", "smod"]:
+            ras = aligned.sel(model=name).drop_vars("model")
+            if name in ["Ensemble", "smod"]:
                 rasters.append(ras)
             else:
                 # rasters.append(sampling.generate_weighted_quantiles(ras, country, q=3))
@@ -66,13 +67,14 @@ for model in MODEL_NAMES:
             da.to_dataset(dim="model").to_dataframe().dropna().reset_index(drop=True)
         )[[model, "DHS", "smod"]]
 
-        # calculate model correlation with DHS
-        coeff_df = ma.model_correlation(df_1).reset_index(drop=True)
-        coeff_df.loc[:, ["Country", "Model"]] = (
-            country,
-            model,
-        )
-        corr_stats = pd.concat([corr_stats, coeff_df])
+        if model != "Ensemble":
+            # calculate model correlation with DHS
+            coeff_df = ma.model_correlation(df_1).reset_index(drop=True)
+            coeff_df.loc[:, ["Country", "Model"]] = (
+                country,
+                model,
+            )
+            corr_stats = pd.concat([corr_stats, coeff_df])
 
         # calculate model performance metrics
         perf_df = ma.model_performance(df_2).reset_index(drop=True)
@@ -82,14 +84,12 @@ for model in MODEL_NAMES:
         )
         class_stats = pd.concat([class_stats, perf_df])
 
-        print("*" * 30)
-
 # reshaping stats dataframe
 stats = pd.merge(
     corr_stats.drop(columns="p value"),
     class_stats,
     on=["Country", "Model", "Cluster"],
-    how="inner",
+    how="right",
     validate="1:1",
 )
 stats = pd.melt(stats, id_vars=["Country", "Model", "Cluster"], var_name="metric")
@@ -101,9 +101,10 @@ stats = (
     .rename_axis(None, axis=1)
 )
 
-stats.to_csv(
-    os.path.join(out_path, "DHS_metrics.csv"),
+stats[["Country", "Cluster", "metric", "Chi", "Lee", "Yeh", "Ensemble"]].to_csv(
+    os.path.join(out_path, "DHS_metrics_contemporary.csv"),
     index=False,
 )
 
 print("All countries completed.")
+print("*" * 30)
